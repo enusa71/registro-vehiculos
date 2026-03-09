@@ -1,0 +1,381 @@
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<title>Registro Vehículos</title>
+
+<style>
+
+body{
+font-family:Arial;
+background:#f4f4f4;
+display:flex;
+justify-content:center;
+align-items:center;
+height:100vh;
+margin:0;
+}
+
+.container{
+background:white;
+padding:20px;
+border-radius:10px;
+box-shadow:0 2px 8px rgba(0,0,0,0.2);
+text-align:center;
+width:95%;
+max-width:420px;
+}
+
+h2,h3{
+margin-top:5px;
+}
+
+input{
+width:92%;
+padding:12px;
+margin:8px;
+border-radius:6px;
+border:1px solid #ccc;
+font-size:18px;
+text-transform:uppercase;
+}
+
+button{
+padding:15px 20px;
+margin-top:12px;
+font-size:18px;
+border:none;
+border-radius:8px;
+background:#0078D4;
+color:white;
+cursor:pointer;
+width:95%;
+}
+
+button:disabled{
+background:#999;
+}
+
+video{
+width:100%;
+max-width:350px;
+border-radius:10px;
+margin-top:10px;
+}
+
+img{
+margin-top:10px;
+width:100%;
+max-width:350px;
+border-radius:10px;
+border:2px solid #ddd;
+}
+
+.info{
+margin-top:8px;
+font-size:14px;
+color:#555;
+}
+
+.estado{
+margin-top:10px;
+font-weight:bold;
+color:green;
+}
+
+.loginEstado{
+margin-top:10px;
+color:#555;
+}
+
+</style>
+
+</head>
+
+<body>
+
+<div class="container">
+
+<!-- LOGIN -->
+
+<div id="loginSection">
+
+<h2>Ingreso Sistema</h2>
+
+<input id="username" placeholder="Usuario">
+
+<input type="password" id="password" placeholder="Contraseña">
+
+<button onclick="login()">Ingresar</button>
+
+<div id="loginEstado" class="loginEstado"></div>
+
+</div>
+
+<!-- APP -->
+
+<div id="appSection" style="display:none">
+
+<h3 id="usuarioLabel"></h3>
+
+<div class="info" id="fechaHora"></div>
+
+<input id="placa" placeholder="Placa vehículo (ABC123)">
+
+<video id="video" autoplay playsinline></video>
+
+<button id="btnFoto" onclick="tomarFoto()">📷 Tomar Foto</button>
+
+<div class="estado" id="estado"></div>
+
+<img id="preview">
+
+<button onclick="logout()" style="background:#999">Cerrar sesión</button>
+
+</div>
+
+</div>
+
+<script>
+
+// ===============================
+// CONFIGURACION
+// ===============================
+
+const WEBHOOK_LOGIN = "https://unmeretriciously-clinographic-marlyn.ngrok-free.dev/webhook/login"
+const WEBHOOK_FOTOS = "https://unmeretriciously-clinographic-marlyn.ngrok-free.dev/webhook/fotos"
+
+const video = document.getElementById("video")
+const canvas = document.createElement("canvas")
+
+// ===============================
+// CONTROL DE SESION
+// ===============================
+
+window.onload = () => {
+
+const usuarioGuardado = localStorage.getItem("usuario")
+const loginTime = localStorage.getItem("loginTime")
+
+if(usuarioGuardado && loginTime){
+
+const horasSesion = 12
+const ahora = Date.now()
+
+if((ahora - loginTime) < horasSesion * 60 * 60 * 1000){
+
+mostrarApp(usuarioGuardado)
+
+}else{
+
+localStorage.clear()
+
+}
+
+}
+
+}
+
+// ===============================
+// LOGIN
+// ===============================
+
+async function login(){
+
+const estado = document.getElementById("loginEstado")
+estado.innerText="Validando usuario..."
+
+const user = document.getElementById("username").value.trim()
+const pass = document.getElementById("password").value.trim()
+
+if(!user || !pass){
+
+estado.innerText="Ingrese usuario y contraseña"
+return
+
+}
+
+try{
+
+const response = await fetch(WEBHOOK_LOGIN,{
+method:"POST",
+headers:{
+"Content-Type":"application/json"
+},
+body:JSON.stringify({
+usuario:user,
+password:pass
+})
+})
+
+const data = await response.json()
+
+if(data.login === "ok"){
+
+localStorage.setItem("usuario",user)
+localStorage.setItem("loginTime",Date.now())
+
+mostrarApp(user)
+
+}else{
+
+estado.innerText="Usuario o contraseña incorrectos"
+
+}
+
+}catch(error){
+
+estado.innerText="Error de conexión"
+
+}
+
+}
+
+// ===============================
+// MOSTRAR APP
+// ===============================
+
+function mostrarApp(user){
+
+document.getElementById("loginSection").style.display="none"
+document.getElementById("appSection").style.display="block"
+
+document.getElementById("usuarioLabel").innerText="Usuario: "+user
+
+actualizarFecha()
+
+navigator.mediaDevices.getUserMedia({
+video:{facingMode:"environment"}
+})
+.then(stream=>{
+video.srcObject=stream
+})
+
+}
+
+// ===============================
+// FECHA
+// ===============================
+
+function actualizarFecha(){
+
+const ahora = new Date()
+
+document.getElementById("fechaHora").innerText =
+"Fecha: "+ ahora.toLocaleDateString() +
+" | Hora: "+ ahora.toLocaleTimeString()
+
+}
+
+// ===============================
+// FORMATO NOMBRE ARCHIVO
+// ===============================
+
+function formatearFechaArchivo(){
+
+const ahora = new Date()
+
+const yyyy = ahora.getFullYear()
+const mm = String(ahora.getMonth()+1).padStart(2,'0')
+const dd = String(ahora.getDate()).padStart(2,'0')
+const hh = String(ahora.getHours()).padStart(2,'0')
+const min = String(ahora.getMinutes()).padStart(2,'0')
+const ss = String(ahora.getSeconds()).padStart(2,'0')
+
+return `${yyyy}-${mm}-${dd}_${hh}-${min}-${ss}`
+
+}
+
+// ===============================
+// TOMAR FOTO
+// ===============================
+
+async function tomarFoto(){
+
+const btn = document.getElementById("btnFoto")
+const estado = document.getElementById("estado")
+
+btn.disabled=true
+estado.innerText="Enviando..."
+
+let placa = document.getElementById("placa").value.trim().toUpperCase()
+
+const regex=/^[A-Z]{3}[0-9]{3}$/
+
+if(placa!=="" && !regex.test(placa)){
+
+alert("Formato placa inválido (ABC123)")
+btn.disabled=false
+estado.innerText=""
+return
+
+}
+
+if(placa===""){
+placa="NOPLACA"
+}
+
+canvas.width=video.videoWidth
+canvas.height=video.videoHeight
+
+canvas.getContext("2d").drawImage(video,0,0)
+
+const blob=await new Promise(resolve=>canvas.toBlob(resolve,"image/jpeg",0.7))
+
+document.getElementById("preview").src=URL.createObjectURL(blob)
+
+const nombreArchivo=placa+"_"+formatearFechaArchivo()+".jpg"
+
+const formData=new FormData()
+
+formData.append("foto",blob,nombreArchivo)
+formData.append("placa",placa)
+formData.append("usuario",localStorage.getItem("usuario"))
+formData.append("fecha",new Date().toISOString())
+
+await fetch(WEBHOOK_FOTOS,{
+method:"POST",
+body:formData
+})
+
+estado.innerText="Registro guardado ✔"
+
+if(navigator.vibrate){
+navigator.vibrate(200)
+}
+
+// limpiar placa
+document.getElementById("placa").value=""
+
+// borrar foto anterior
+document.getElementById("preview").src=""
+
+// volver a enfocar placa
+document.getElementById("placa").focus()
+
+btn.disabled=false
+
+actualizarFecha()
+
+}
+
+// ===============================
+// LOGOUT
+// ===============================
+
+function logout(){
+
+localStorage.clear()
+location.reload()
+
+}
+
+</script>
+
+</body>
+</html>
+
