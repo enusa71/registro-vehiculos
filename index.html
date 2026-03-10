@@ -328,7 +328,7 @@ const ctx = canvas.getContext("2d")
 ctx.drawImage(video,0,0,canvas.width,canvas.height)
 
 // ===============================
-// TEXTO EN LA FOTO
+// TEXTO EN LA FOTO (MEJORADO)
 // ===============================
 
 const ahora = new Date()
@@ -338,33 +338,32 @@ const hora = ahora.toLocaleTimeString()
 
 const usuario = localStorage.getItem("usuario")
 
-// texto a imprimir
-const linea1 = "FECHA: " + fecha + " " + hora
-const linea2 = "USUARIO: " + usuario
+const linea1 = fecha + " " + hora
+const linea2 = "USER: " + usuario
 const linea3 = "PLACA: " + placa
 
-// estilo
-ctx.font = "28px Arial"
+// tamaño texto
+ctx.font = "22px Arial"
+
+// fondo pequeño semitransparente
+const altoCaja = 70
+ctx.fillStyle = "rgba(0,0,0,0.35)"
+ctx.fillRect(0, canvas.height - altoCaja, canvas.width, altoCaja)
+
+// estilo texto
 ctx.fillStyle = "yellow"
 ctx.strokeStyle = "black"
-ctx.lineWidth = 4
+ctx.lineWidth = 3
 
-// fondo semi transparente
-ctx.fillStyle = "rgba(0,0,0,0.5)"
-ctx.fillRect(10, canvas.height-120, 420, 110)
+// escribir texto
+ctx.strokeText(linea1,10,canvas.height-45)
+ctx.fillText(linea1,10,canvas.height-45)
 
-// color texto
-ctx.fillStyle = "yellow"
+ctx.strokeText(linea2,10,canvas.height-25)
+ctx.fillText(linea2,10,canvas.height-25)
 
-// dibujar texto
-ctx.strokeText(linea1,20,canvas.height-80)
-ctx.fillText(linea1,20,canvas.height-80)
-
-ctx.strokeText(linea2,20,canvas.height-50)
-ctx.fillText(linea2,20,canvas.height-50)
-
-ctx.strokeText(linea3,20,canvas.height-20)
-ctx.fillText(linea3,20,canvas.height-20)
+ctx.strokeText(linea3,10,canvas.height-5)
+ctx.fillText(linea3,10,canvas.height-5)
 
 const blob=await new Promise(resolve=>canvas.toBlob(resolve,"image/jpeg",0.7))
 
@@ -420,5 +419,6 @@ location.reload()
 
 </body>
 </html>
+
 
 
