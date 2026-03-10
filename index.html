@@ -325,7 +325,49 @@ placa="NOPLACA"
 canvas.width=video.videoWidth
 canvas.height=video.videoHeight
 
-canvas.getContext("2d").drawImage(video,0,0)
+const ctx = canvas.getContext("2d")
+
+// capturar imagen
+ctx.drawImage(video,0,0,canvas.width,canvas.height)
+
+// ===============================
+// TEXTO EN LA FOTO
+// ===============================
+
+const ahora = new Date()
+
+const fecha = ahora.toLocaleDateString()
+const hora = ahora.toLocaleTimeString()
+
+const usuario = localStorage.getItem("usuario")
+
+// texto a imprimir
+const linea1 = "FECHA: " + fecha + " " + hora
+const linea2 = "USUARIO: " + usuario
+const linea3 = "PLACA: " + placa
+
+// estilo
+ctx.font = "28px Arial"
+ctx.fillStyle = "yellow"
+ctx.strokeStyle = "black"
+ctx.lineWidth = 4
+
+// fondo semi transparente
+ctx.fillStyle = "rgba(0,0,0,0.5)"
+ctx.fillRect(10, canvas.height-120, 420, 110)
+
+// color texto
+ctx.fillStyle = "yellow"
+
+// dibujar texto
+ctx.strokeText(linea1,20,canvas.height-80)
+ctx.fillText(linea1,20,canvas.height-80)
+
+ctx.strokeText(linea2,20,canvas.height-50)
+ctx.fillText(linea2,20,canvas.height-50)
+
+ctx.strokeText(linea3,20,canvas.height-20)
+ctx.fillText(linea3,20,canvas.height-20)
 
 const blob=await new Promise(resolve=>canvas.toBlob(resolve,"image/jpeg",0.7))
 
@@ -391,6 +433,7 @@ navigator.serviceWorker.register("service-worker.js")
 
 </body>
 </html>
+
 
 
 
