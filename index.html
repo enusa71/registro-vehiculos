@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -7,7 +6,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 
 <link rel="manifest" href="manifest.json">
-<meta name="theme-color" content="#0078D4">  
+<meta name="theme-color" content="#0078D4">
 
 <title>Registro Vehículos</title>
 
@@ -103,8 +102,6 @@ color:#555;
 
 <div class="container">
 
-<!-- LOGIN -->
-
 <div id="loginSection">
 
 <h2>Ingreso Sistema</h2>
@@ -118,8 +115,6 @@ color:#555;
 <div id="loginEstado" class="loginEstado"></div>
 
 </div>
-
-<!-- APP -->
 
 <div id="appSection" style="display:none">
 
@@ -145,19 +140,11 @@ color:#555;
 
 <script>
 
-// ===============================
-// CONFIGURACION
-// ===============================
-
-const WEBHOOK_LOGIN = "https://unmeretriciously-clinographic-marlyn.ngrok-free.dev/webhook/login"
-const WEBHOOK_FOTOS = "https://unmeretriciously-clinographic-marlyn.ngrok-free.dev/webhook/fotos"
+const WEBHOOK_LOGIN = "TU_WEBHOOK_LOGIN"
+const WEBHOOK_FOTOS = "TU_WEBHOOK_FOTOS"
 
 const video = document.getElementById("video")
 const canvas = document.createElement("canvas")
-
-// ===============================
-// CONTROL DE SESION
-// ===============================
 
 window.onload = () => {
 
@@ -182,10 +169,6 @@ localStorage.clear()
 }
 
 }
-
-// ===============================
-// LOGIN
-// ===============================
 
 async function login(){
 
@@ -238,10 +221,6 @@ estado.innerText="Error de conexión"
 
 }
 
-// ===============================
-// MOSTRAR APP
-// ===============================
-
 function mostrarApp(user){
 
 document.getElementById("loginSection").style.display="none"
@@ -260,10 +239,6 @@ video.srcObject=stream
 
 }
 
-// ===============================
-// FECHA
-// ===============================
-
 function actualizarFecha(){
 
 const ahora = new Date()
@@ -273,10 +248,6 @@ document.getElementById("fechaHora").innerText =
 " | Hora: "+ ahora.toLocaleTimeString()
 
 }
-
-// ===============================
-// FORMATO NOMBRE ARCHIVO
-// ===============================
 
 function formatearFechaArchivo(){
 
@@ -292,10 +263,6 @@ const ss = String(ahora.getSeconds()).padStart(2,'0')
 return `${yyyy}-${mm}-${dd}_${hh}-${min}-${ss}`
 
 }
-
-// ===============================
-// TOMAR FOTO
-// ===============================
 
 async function tomarFoto(){
 
@@ -327,12 +294,7 @@ canvas.height=video.videoHeight
 
 const ctx = canvas.getContext("2d")
 
-// capturar imagen
 ctx.drawImage(video,0,0,canvas.width,canvas.height)
-
-// ===============================
-// TEXTO EN LA FOTO
-// ===============================
 
 const ahora = new Date()
 
@@ -341,35 +303,31 @@ const hora = ahora.toLocaleTimeString()
 
 const usuario = localStorage.getItem("usuario")
 
-// texto a imprimir
-const linea1 = "FECHA: " + fecha + " " + hora
-const linea2 = "USUARIO: " + usuario
-const linea3 = "PLACA: " + placa
+const linea1 = fecha+" "+hora
+const linea2 = "USER: "+usuario
+const linea3 = "PLACA: "+placa
 
-// estilo
-ctx.font = "28px Arial"
-ctx.fillStyle = "yellow"
-ctx.strokeStyle = "black"
-ctx.lineWidth = 4
+ctx.font="22px Arial"
 
-// fondo semi transparente
-ctx.fillStyle = "rgba(0,0,0,0.5)"
-ctx.fillRect(10, canvas.height-120, 420, 110)
+const altoCaja=70
 
-// color texto
-ctx.fillStyle = "yellow"
+ctx.fillStyle="rgba(0,0,0,0.35)"
+ctx.fillRect(0,canvas.height-altoCaja,canvas.width,altoCaja)
 
-// dibujar texto
-ctx.strokeText(linea1,20,canvas.height-80)
-ctx.fillText(linea1,20,canvas.height-80)
+ctx.fillStyle="yellow"
+ctx.strokeStyle="black"
+ctx.lineWidth=3
 
-ctx.strokeText(linea2,20,canvas.height-50)
-ctx.fillText(linea2,20,canvas.height-50)
+ctx.strokeText(linea1,10,canvas.height-45)
+ctx.fillText(linea1,10,canvas.height-45)
 
-ctx.strokeText(linea3,20,canvas.height-20)
-ctx.fillText(linea3,20,canvas.height-20)
+ctx.strokeText(linea2,10,canvas.height-25)
+ctx.fillText(linea2,10,canvas.height-25)
 
-const blob=await new Promise(resolve=>canvas.toBlob(resolve,"image/jpeg",0.7))
+ctx.strokeText(linea3,10,canvas.height-5)
+ctx.fillText(linea3,10,canvas.height-5)
+
+const blob=await new Promise(resolve=>canvas.toBlob(resolve,"image/jpeg",0.8))
 
 document.getElementById("preview").src=URL.createObjectURL(blob)
 
@@ -379,7 +337,7 @@ const formData=new FormData()
 
 formData.append("foto",blob,nombreArchivo)
 formData.append("placa",placa)
-formData.append("usuario",localStorage.getItem("usuario"))
+formData.append("usuario",usuario)
 formData.append("fecha",new Date().toISOString())
 
 await fetch(WEBHOOK_FOTOS,{
@@ -393,13 +351,8 @@ if(navigator.vibrate){
 navigator.vibrate(200)
 }
 
-// limpiar placa
 document.getElementById("placa").value=""
-
-// borrar foto anterior
 document.getElementById("preview").src=""
-
-// volver a enfocar placa
 document.getElementById("placa").focus()
 
 btn.disabled=false
@@ -408,10 +361,6 @@ actualizarFecha()
 
 }
 
-// ===============================
-// LOGOUT
-// ===============================
-
 function logout(){
 
 localStorage.clear()
@@ -419,22 +368,11 @@ location.reload()
 
 }
 
-// ===============================
-// SERVICE WORKER (PWA)
-// ===============================
-
 if ("serviceWorker" in navigator) {
 navigator.serviceWorker.register("service-worker.js")
-.then(() => console.log("Service Worker registrado"))
-.catch(err => console.log("Error registrando Service Worker", err))
-}  
+}
 
 </script>
 
 </body>
 </html>
-
-
-
-
-
