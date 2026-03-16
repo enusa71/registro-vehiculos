@@ -394,11 +394,6 @@ formData.append("placa",placa)
 formData.append("usuario",localStorage.getItem("usuario"))
 formData.append("fecha",new Date().toISOString())
 
-await fetch(WEBHOOK_FOTOS,{
-method:"POST",
-body:formData
-})
-
 estado.innerText="Registro guardado ✔"
 
 if(navigator.vibrate){
