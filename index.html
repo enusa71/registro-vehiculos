@@ -425,6 +425,47 @@ actualizarFecha()
 
 }
 
+async function confirmarFoto(){
+
+const estado = document.getElementById("estado")
+
+estado.innerText="Guardando..."
+
+const formData=new FormData()
+
+formData.append("foto",window.fotoBlob,window.nombreArchivo)
+formData.append("placa",window.placaFoto)
+formData.append("usuario",localStorage.getItem("usuario"))
+formData.append("fecha",new Date().toISOString())
+
+await fetch(WEBHOOK_FOTOS,{
+method:"POST",
+body:formData
+})
+
+estado.innerText="Registro guardado ✔"
+
+if(navigator.vibrate){
+navigator.vibrate(200)
+}
+
+document.getElementById("preview").style.display="none"
+document.getElementById("confirmacion").style.display="none"
+
+document.getElementById("placa").value=""
+document.getElementById("placa").focus()
+
+actualizarFecha()
+}
+
+function repetirFoto(){
+
+document.getElementById("preview").style.display="none"
+document.getElementById("confirmacion").style.display="none"
+
+document.getElementById("estado").innerText=""
+
+}  
 // ===============================
 // LOGOUT
 // ===============================
