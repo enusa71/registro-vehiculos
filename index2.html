@@ -459,6 +459,45 @@ document.getElementById("confirmacion").style.display="none"
 document.getElementById("estado").innerText=""
 
 }  
+
+async function enviarRegistro(){
+
+const estado=document.getElementById("estado")
+
+if(fotos.length===0){
+estado.innerText="Debe tomar al menos una foto"
+return
+}
+
+estado.innerText="Enviando fotos..."
+
+const formData=new FormData()
+
+const placa=document.getElementById("placa").value.trim().toUpperCase()
+
+formData.append("placa",placa)
+formData.append("usuario",localStorage.getItem("usuario"))
+formData.append("fecha",new Date().toISOString())
+
+fotos.forEach((f,i)=>{
+formData.append("foto"+i,f.blob,f.nombre)
+})
+
+await fetch(WEBHOOK_FOTOS,{
+method:"POST",
+body:formData
+})
+
+estado.innerText="Registro guardado ✔"
+
+fotos=[]
+
+document.getElementById("placa").value=""
+document.getElementById("placa").focus()
+
+actualizarFecha()
+
+}  
 // ===============================
 // LOGOUT
 // ===============================
