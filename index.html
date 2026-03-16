@@ -397,13 +397,6 @@ document.getElementById("confirmacion").style.display="block"
 
 estado.innerText="Revise la foto antes de enviarla"
 
-const formData=new FormData()
-
-formData.append("foto",blob,nombreArchivo)
-formData.append("placa",placa)
-formData.append("usuario",localStorage.getItem("usuario"))
-formData.append("fecha",new Date().toISOString())
-
 estado.innerText="Registro guardado ✔"
 
 if(navigator.vibrate){
