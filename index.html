@@ -1,5 +1,5 @@
-
 <!DOCTYPE html>
+
 <html lang="es">
 <head>
 
@@ -100,14 +100,11 @@ color:#555;
 
 <div class="container">
 
-<!-- LOGIN -->
-
 <div id="loginSection">
 
 <h2>Ingreso Sistema</h2>
 
 <input id="username" placeholder="Usuario">
-
 <input type="password" id="password" placeholder="Contraseña">
 
 <button onclick="login()">Ingresar</button>
@@ -115,8 +112,6 @@ color:#555;
 <div id="loginEstado" class="loginEstado"></div>
 
 </div>
-
-<!-- APP -->
 
 <div id="appSection" style="display:none">
 
@@ -129,6 +124,12 @@ color:#555;
 <video id="video" autoplay playsinline></video>
 
 <button id="btnFoto" onclick="tomarFoto()">📷 Tomar Foto</button>
+
+<div class="info" id="contadorFotos">Fotos tomadas: 0</div>
+
+<button onclick="enviarRegistro()" style="background:#28a745">
+🚗 Finalizar Registro
+</button>
 
 <div class="estado" id="estado"></div>
 
@@ -154,24 +155,13 @@ color:#555;
 
 <script>
 
-// ===============================
-// CONFIGURACION
-// ===============================
-
-//const WEBHOOK_LOGIN = "https://unmeretriciously-clinographic-marlyn.ngrok-free.dev/webhook/login"
-//const WEBHOOK_FOTOS = "https://unmeretriciously-clinographic-marlyn.ngrok-free.dev/webhook/fotos"
-
 const WEBHOOK_LOGIN = "https://n8n.enusa.org/webhook/login"
 const WEBHOOK_FOTOS = "https://n8n.enusa.org/webhook/fotos"
 
 const video = document.getElementById("video")
 const canvas = document.createElement("canvas")
 
-//let fotos = []  
-
-// ===============================
-// CONTROL DE SESION
-// ===============================
+let fotos = []
 
 window.onload = () => {
 
@@ -196,10 +186,6 @@ localStorage.clear()
 }
 
 }
-
-// ===============================
-// LOGIN
-// ===============================
 
 async function login(){
 
@@ -252,10 +238,6 @@ estado.innerText="Error de conexión"
 
 }
 
-// ===============================
-// MOSTRAR APP
-// ===============================
-
 function mostrarApp(user){
 
 document.getElementById("loginSection").style.display="none"
@@ -274,10 +256,6 @@ video.srcObject=stream
 
 }
 
-// ===============================
-// FECHA
-// ===============================
-
 function actualizarFecha(){
 
 const ahora = new Date()
@@ -287,10 +265,6 @@ document.getElementById("fechaHora").innerText =
 " | Hora: "+ ahora.toLocaleTimeString()
 
 }
-
-// ===============================
-// FORMATO NOMBRE ARCHIVO
-// ===============================
 
 function formatearFechaArchivo(){
 
@@ -307,17 +281,9 @@ return `${yyyy}-${mm}-${dd}_${hh}-${min}-${ss}`
 
 }
 
-// ===============================
-// TOMAR FOTO
-// ===============================
-
 async function tomarFoto(){
 
-const btn = document.getElementById("btnFoto")
 const estado = document.getElementById("estado")
-
-btn.disabled=true
-estado.innerText="Enviando..."
 
 let placa = document.getElementById("placa").value.trim().toUpperCase()
 
@@ -326,8 +292,6 @@ const regex=/^[A-Z]{3}[0-9]{3}$/
 if(placa!=="" && !regex.test(placa)){
 
 alert("Formato placa inválido (ABC123)")
-btn.disabled=false
-estado.innerText=""
 return
 
 }
@@ -341,12 +305,7 @@ canvas.height=video.videoHeight
 
 const ctx = canvas.getContext("2d")
 
-// capturar imagen
 ctx.drawImage(video,0,0,canvas.width,canvas.height)
-
-// ===============================
-// TEXTO EN LA FOTO (MEJORADO)
-// ===============================
 
 const ahora = new Date()
 
@@ -359,21 +318,12 @@ const linea1 = fecha + " " + hora
 const linea2 = "USER: " + usuario
 const linea3 = "PLACA: " + placa
 
-// tamaño texto
 ctx.font = "12px Arial"
 
-// fondo pequeño semitransparente
-//const altoCaja = 70
-// fondo de las letras no trasnparente lo mente para que se atransparente  
-//ctx.fillStyle = "rgba(0,0,0,0.35)"
-//ctx.fillRect(0, canvas.height - altoCaja, canvas.width, altoCaja)
-
-// estilo texto
 ctx.fillStyle = "yellow"
 ctx.strokeStyle = "black"
 ctx.lineWidth = 3
 
-// escribir texto
 ctx.strokeText(linea1,10,canvas.height-45)
 ctx.fillText(linea1,10,canvas.height-45)
 
@@ -387,37 +337,66 @@ const blob = await new Promise(resolve => canvas.toBlob(resolve,"image/jpeg",0.7
 
 const nombreArchivo = placa + "_" + formatearFechaArchivo() + ".jpg"
 
-// guardar datos temporalmente
 window.fotoBlob = blob
 window.nombreArchivo = nombreArchivo
-window.placaFoto = placa
 
-// mostrar vista previa
 const preview = document.getElementById("preview")
 preview.src = URL.createObjectURL(blob)
 preview.style.display = "block"
 
-// mostrar botones confirmar / repetir
 document.getElementById("confirmacion").style.display = "block"
 
 estado.innerText = "Revise la foto antes de enviarla"
 
-btn.disabled = false
+}
+
+function confirmarFoto(){
+
+fotos.push({
+blob:window.fotoBlob,
+nombre:window.nombreArchivo
+})
+
+document.getElementById("contadorFotos").innerText =
+"Fotos tomadas: " + fotos.length
+
+document.getElementById("estado").innerText =
+"Foto agregada ("+fotos.length+")"
+
+document.getElementById("preview").style.display="none"
+document.getElementById("confirmacion").style.display="none"
 
 }
 
-async function confirmarFoto(){
+function repetirFoto(){
 
-const estado = document.getElementById("estado")
+document.getElementById("preview").style.display="none"
+document.getElementById("confirmacion").style.display="none"
 
-estado.innerText="Guardando..."
+}
+
+async function enviarRegistro(){
+
+const estado=document.getElementById("estado")
+
+if(fotos.length===0){
+estado.innerText="Debe tomar al menos una foto"
+return
+}
+
+estado.innerText="Enviando fotos..."
 
 const formData=new FormData()
 
-formData.append("foto",window.fotoBlob,window.nombreArchivo)
-formData.append("placa",window.placaFoto)
+const placa=document.getElementById("placa").value.trim().toUpperCase()
+
+formData.append("placa",placa)
 formData.append("usuario",localStorage.getItem("usuario"))
 formData.append("fecha",new Date().toISOString())
+
+fotos.forEach((f,i)=>{
+formData.append("foto"+i,f.blob,f.nombre)
+})
 
 await fetch(WEBHOOK_FOTOS,{
 method:"POST",
@@ -426,30 +405,16 @@ body:formData
 
 estado.innerText="Registro guardado ✔"
 
-if(navigator.vibrate){
-navigator.vibrate(200)
-}
+fotos=[]
 
-document.getElementById("preview").style.display="none"
-document.getElementById("confirmacion").style.display="none"
+document.getElementById("contadorFotos").innerText="Fotos tomadas: 0"
 
 document.getElementById("placa").value=""
 document.getElementById("placa").focus()
 
 actualizarFecha()
+
 }
-
-function repetirFoto(){
-
-document.getElementById("preview").style.display="none"
-document.getElementById("confirmacion").style.display="none"
-
-document.getElementById("estado").innerText=""
-
-}  
-// ===============================
-// LOGOUT
-// ===============================
 
 function logout(){
 
@@ -462,10 +427,3 @@ location.reload()
 
 </body>
 </html>
-
-
-
-
-
-
-
