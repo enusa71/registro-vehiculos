@@ -421,7 +421,9 @@ fotos.push({
 blob:window.fotoBlob,
 nombre:window.nombreArchivo
 })
-
+document.getElementById("contadorFotos").innerText =
+"Fotos tomadas: " + fotos.length
+  
 document.getElementById("estado").innerText =
 "Foto agregada ("+fotos.length+")"
 
