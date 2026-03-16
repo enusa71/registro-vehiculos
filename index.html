@@ -132,7 +132,19 @@ color:#555;
 
 <div class="estado" id="estado"></div>
 
-<img id="preview">
+<img id="preview" style="display:none">
+
+<div id="confirmacion" style="display:none">
+
+<button onclick="confirmarFoto()" style="background:#28a745">
+✔ Confirmar Foto
+</button>
+
+<button onclick="repetirFoto()" style="background:#dc3545">
+🔄 Tomar Otra
+</button>
+
+</div>
 
 <button onclick="logout()" style="background:#999">Cerrar sesión</button>
 
