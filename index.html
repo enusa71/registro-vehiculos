@@ -1,6 +1,5 @@
 
 <!DOCTYPE html>
-
 <html lang="es">
 <head>
 
@@ -101,11 +100,14 @@ color:#555;
 
 <div class="container">
 
+<!-- LOGIN -->
+
 <div id="loginSection">
 
 <h2>Ingreso Sistema</h2>
 
 <input id="username" placeholder="Usuario">
+
 <input type="password" id="password" placeholder="Contraseña">
 
 <button onclick="login()">Ingresar</button>
@@ -113,6 +115,8 @@ color:#555;
 <div id="loginEstado" class="loginEstado"></div>
 
 </div>
+
+<!-- APP -->
 
 <div id="appSection" style="display:none">
 
@@ -126,27 +130,9 @@ color:#555;
 
 <button id="btnFoto" onclick="tomarFoto()">📷 Tomar Foto</button>
 
-<div class="info" id="contadorFotos">Fotos tomadas: 0</div>
-
-<button onclick="enviarRegistro()" style="background:#28a745">
-🚗 Finalizar Registro
-</button>
-
 <div class="estado" id="estado"></div>
 
-<img id="preview" style="display:none">
-
-<div id="confirmacion" style="display:none">
-
-<button onclick="confirmarFoto()" style="background:#28a745">
-✔ Confirmar Foto
-</button>
-
-<button onclick="repetirFoto()" style="background:#dc3545">
-🔄 Tomar Otra
-</button>
-
-</div>
+<img id="preview">
 
 <button onclick="logout()" style="background:#999">Cerrar sesión</button>
 
@@ -156,13 +142,19 @@ color:#555;
 
 <script>
 
+// ===============================
+// CONFIGURACION
+// ===============================
+
 const WEBHOOK_LOGIN = "https://n8n.enusa.org/webhook/login"
 const WEBHOOK_FOTOS = "https://n8n.enusa.org/webhook/fotos"
 
 const video = document.getElementById("video")
 const canvas = document.createElement("canvas")
 
-let fotos = []
+// ===============================
+// CONTROL DE SESION
+// ===============================
 
 window.onload = () => {
 
@@ -187,6 +179,10 @@ localStorage.clear()
 }
 
 }
+
+// ===============================
+// LOGIN
+// ===============================
 
 async function login(){
 
@@ -239,6 +235,10 @@ estado.innerText="Error de conexión"
 
 }
 
+// ===============================
+// MOSTRAR APP
+// ===============================
+
 function mostrarApp(user){
 
 document.getElementById("loginSection").style.display="none"
@@ -257,6 +257,10 @@ video.srcObject=stream
 
 }
 
+// ===============================
+// FECHA
+// ===============================
+
 function actualizarFecha(){
 
 const ahora = new Date()
@@ -266,6 +270,10 @@ document.getElementById("fechaHora").innerText =
 " | Hora: "+ ahora.toLocaleTimeString()
 
 }
+
+// ===============================
+// FORMATO NOMBRE ARCHIVO
+// ===============================
 
 function formatearFechaArchivo(){
 
@@ -282,9 +290,17 @@ return `${yyyy}-${mm}-${dd}_${hh}-${min}-${ss}`
 
 }
 
+// ===============================
+// TOMAR FOTO
+// ===============================
+
 async function tomarFoto(){
 
+const btn = document.getElementById("btnFoto")
 const estado = document.getElementById("estado")
+
+btn.disabled=true
+estado.innerText="Enviando..."
 
 let placa = document.getElementById("placa").value.trim().toUpperCase()
 
@@ -293,6 +309,8 @@ const regex=/^[A-Z]{3}[0-9]{3}$/
 if(placa!=="" && !regex.test(placa)){
 
 alert("Formato placa inválido (ABC123)")
+btn.disabled=false
+estado.innerText=""
 return
 
 }
@@ -304,100 +322,20 @@ placa="NOPLACA"
 canvas.width=video.videoWidth
 canvas.height=video.videoHeight
 
-const ctx = canvas.getContext("2d")
+canvas.getContext("2d").drawImage(video,0,0)
 
-ctx.drawImage(video,0,0,canvas.width,canvas.height)
+const blob=await new Promise(resolve=>canvas.toBlob(resolve,"image/jpeg",0.7))
 
-const ahora = new Date()
+document.getElementById("preview").src=URL.createObjectURL(blob)
 
-const fecha = ahora.toLocaleDateString()
-const hora = ahora.toLocaleTimeString()
-
-const usuario = localStorage.getItem("usuario")
-
-const linea1 = fecha + " " + hora
-const linea2 = "USER: " + usuario
-const linea3 = "PLACA: " + placa
-
-ctx.font = "12px Arial"
-
-ctx.fillStyle = "yellow"
-ctx.strokeStyle = "black"
-ctx.lineWidth = 3
-
-ctx.strokeText(linea1,10,canvas.height-45)
-ctx.fillText(linea1,10,canvas.height-45)
-
-ctx.strokeText(linea2,10,canvas.height-25)
-ctx.fillText(linea2,10,canvas.height-25)
-
-ctx.strokeText(linea3,10,canvas.height-5)
-ctx.fillText(linea3,10,canvas.height-5)
-
-const blob = await new Promise(resolve => canvas.toBlob(resolve,"image/jpeg",0.7))
-
-const nombreArchivo = placa + "_" + formatearFechaArchivo() + ".jpg"
-
-window.fotoBlob = blob
-window.nombreArchivo = nombreArchivo
-
-const preview = document.getElementById("preview")
-preview.src = URL.createObjectURL(blob)
-preview.style.display = "block"
-
-document.getElementById("confirmacion").style.display = "block"
-
-estado.innerText = "Revise la foto antes de enviarla"
-
-}
-
-function confirmarFoto(){
-
-fotos.push({
-blob:window.fotoBlob,
-nombre:window.nombreArchivo
-})
-
-document.getElementById("contadorFotos").innerText =
-"Fotos tomadas: " + fotos.length
-
-document.getElementById("estado").innerText =
-"Foto agregada ("+fotos.length+")"
-
-document.getElementById("preview").style.display="none"
-document.getElementById("confirmacion").style.display="none"
-
-}
-
-function repetirFoto(){
-
-document.getElementById("preview").style.display="none"
-document.getElementById("confirmacion").style.display="none"
-
-}
-
-async function enviarRegistro(){
-
-const estado=document.getElementById("estado")
-
-if(fotos.length===0){
-estado.innerText="Debe tomar al menos una foto"
-return
-}
-
-estado.innerText="Enviando fotos..."
+const nombreArchivo=placa+"_"+formatearFechaArchivo()+".jpg"
 
 const formData=new FormData()
 
-const placa=document.getElementById("placa").value.trim().toUpperCase()
-
+formData.append("foto",blob,nombreArchivo)
 formData.append("placa",placa)
 formData.append("usuario",localStorage.getItem("usuario"))
 formData.append("fecha",new Date().toISOString())
-
-fotos.forEach((f,i)=>{
-formData.append("foto"+i,f.blob,f.nombre)
-})
 
 await fetch(WEBHOOK_FOTOS,{
 method:"POST",
@@ -406,16 +344,28 @@ body:formData
 
 estado.innerText="Registro guardado ✔"
 
-fotos=[]
+if(navigator.vibrate){
+navigator.vibrate(200)
+}
 
-document.getElementById("contadorFotos").innerText="Fotos tomadas: 0"
-
+// limpiar placa
 document.getElementById("placa").value=""
+
+// borrar foto anterior
+document.getElementById("preview").src=""
+
+// volver a enfocar placa
 document.getElementById("placa").focus()
+
+btn.disabled=false
 
 actualizarFecha()
 
 }
+
+// ===============================
+// LOGOUT
+// ===============================
 
 function logout(){
 
