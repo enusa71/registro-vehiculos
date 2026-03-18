@@ -388,22 +388,37 @@ estado.innerText="Enviando fotos..."
 
 const formData=new FormData()
 
-const placa=document.getElementById("placa").value.trim().toUpperCase()
+let placa=document.getElementById("placa").value.trim().toUpperCase()
+if(placa===""){ placa="NOPLACA" }
 
 formData.append("placa",placa)
 formData.append("usuario",localStorage.getItem("usuario"))
 formData.append("fecha",new Date().toISOString())
 
+// ✅ NUEVO: total de fotos
+formData.append("totalFotos", fotos.length)
+
 fotos.forEach((f,i)=>{
 formData.append("foto"+i,f.blob,f.nombre)
 })
 
+try{
 await fetch(WEBHOOK_FOTOS,{
 method:"POST",
 body:formData
 })
 
 estado.innerText="Registro guardado ✔"
+
+// ✅ limpiar mensaje luego de 3 segundos
+setTimeout(()=>{
+estado.innerText=""
+},3000)
+
+}catch(error){
+estado.innerText="Error al enviar ❌"
+return
+}
 
 fotos=[]
 
@@ -427,3 +442,4 @@ location.reload()
 
 </body>
 </html>
+
