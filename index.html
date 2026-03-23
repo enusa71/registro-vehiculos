@@ -28,15 +28,16 @@
         border-radius: 28px;
         padding: 20px;
         box-shadow: 0 8px 24px rgba(0,0,0,0.1);
-        text-align: center;
         width: 100%;
         max-width: 500px;
         margin: auto;
+        transition: all 0.3s ease;
     }
 
     h2, h3 {
         margin-bottom: 16px;
         color: #1a1a1a;
+        text-align: center;
     }
 
     input {
@@ -49,6 +50,7 @@
         text-transform: uppercase;
         background: #f9f9f9;
         transition: all 0.2s;
+        box-sizing: border-box;
     }
 
     input:focus {
@@ -80,11 +82,18 @@
         transform: none;
     }
 
-    /* Contenedor de la cámara con zoom */
+    /* Secciones que se muestran/ocultan */
+    .section {
+        transition: all 0.3s ease;
+    }
+
+    .camera-section {
+        margin: 16px 0;
+    }
+
     .camera-container {
         position: relative;
         width: 100%;
-        margin: 16px 0;
         border-radius: 20px;
         overflow: hidden;
         background: #000;
@@ -95,11 +104,8 @@
         width: 100%;
         height: auto;
         display: block;
-        cursor: pointer;
-        transition: transform 0.1s ease;
     }
 
-    /* Controles de zoom */
     .zoom-controls {
         position: absolute;
         bottom: 16px;
@@ -123,7 +129,6 @@
         align-items: center;
         justify-content: center;
         cursor: pointer;
-        transition: background 0.2s;
         margin: 0;
         padding: 0;
     }
@@ -133,7 +138,6 @@
         transform: scale(0.95);
     }
 
-    /* Indicador de zoom */
     .zoom-indicator {
         position: absolute;
         bottom: 16px;
@@ -148,35 +152,25 @@
         z-index: 10;
     }
 
-    .info {
-        margin: 8px 0;
-        font-size: 13px;
-        color: #666;
+    /* Sección de confirmación de foto */
+    .confirm-section {
+        text-align: center;
+        margin: 16px 0;
     }
 
-    .estado, .loginEstado {
-        margin-top: 12px;
-        font-weight: 500;
-        font-size: 14px;
-    }
-
-    .estado { color: #28a745; }
-    .loginEstado { color: #dc3545; }
-
-    .preview-img {
-        margin-top: 12px;
+    .confirm-img {
         width: 100%;
-        border-radius: 16px;
+        border-radius: 20px;
         border: 2px solid #ddd;
+        margin-bottom: 16px;
     }
 
-    .confirmacion-buttons {
+    .confirm-buttons {
         display: flex;
         gap: 12px;
-        margin-top: 12px;
     }
 
-    .confirmacion-buttons button {
+    .confirm-buttons button {
         flex: 1;
         margin: 0;
     }
@@ -189,14 +183,40 @@
         background: #dc3545;
     }
 
+    .info {
+        margin: 8px 0;
+        font-size: 13px;
+        color: #666;
+        text-align: center;
+    }
+
+    .estado, .loginEstado {
+        margin-top: 12px;
+        font-weight: 500;
+        font-size: 14px;
+        text-align: center;
+    }
+
+    .estado { color: #28a745; }
+    .loginEstado { color: #dc3545; }
+
     .btn-logout {
         background: #6c757d;
         margin-top: 16px;
     }
 
-    /* Scroll suave */
-    html {
-        scroll-behavior: smooth;
+    .counter {
+        background: #f0f2f5;
+        padding: 8px 16px;
+        border-radius: 30px;
+        display: inline-block;
+        margin: 8px auto;
+        font-size: 14px;
+        font-weight: 500;
+    }
+
+    .hidden {
+        display: none;
     }
 </style>
 </head>
@@ -204,7 +224,7 @@
 
 <div class="container">
     <!-- Login Section -->
-    <div id="loginSection">
+    <div id="loginSection" class="section">
         <h2>🔐 Ingreso</h2>
         <input id="username" placeholder="Usuario" autocomplete="off">
         <input type="password" id="password" placeholder="Contraseña">
@@ -213,39 +233,43 @@
     </div>
 
     <!-- App Section -->
-    <div id="appSection" style="display:none">
+    <div id="appSection" class="section" style="display:none">
         <h3 id="usuarioLabel"></h3>
         <div class="info" id="fechaHora"></div>
         
         <input id="placa" placeholder="Placa (ABC123)" autocomplete="off">
         
-        <!-- Cámara con zoom -->
-        <div class="camera-container">
-            <video id="video" autoplay playsinline></video>
-            <div class="zoom-controls">
-                <button class="zoom-btn" id="zoomIn" onclick="zoomIn()">+</button>
-                <button class="zoom-btn" id="zoomOut" onclick="zoomOut()">-</button>
+        <!-- Sección de cámara (visible cuando se toman fotos) -->
+        <div id="cameraSection" class="camera-section">
+            <div class="camera-container">
+                <video id="video" autoplay playsinline></video>
+                <div class="zoom-controls">
+                    <button class="zoom-btn" id="zoomIn" onclick="zoomIn()">+</button>
+                    <button class="zoom-btn" id="zoomOut" onclick="zoomOut()">-</button>
+                </div>
+                <div class="zoom-indicator" id="zoomIndicator">1x</div>
             </div>
-            <div class="zoom-indicator" id="zoomIndicator">1x</div>
+            <button id="btnFoto" onclick="tomarFoto()">📸 Tomar Foto</button>
         </div>
         
-        <button id="btnFoto" onclick="tomarFoto()">📸 Tomar Foto</button>
-        <div class="info" id="contadorFotos">📷 Fotos tomadas: 0</div>
+        <!-- Sección de confirmación de foto (visible después de tomar foto) -->
+        <div id="confirmSection" class="confirm-section hidden">
+            <img id="previewImg" class="confirm-img">
+            <div class="confirm-buttons">
+                <button class="btn-confirm" onclick="confirmarFoto()">✔ Confirmar</button>
+                <button class="btn-retake" onclick="repetirFoto()">🔄 Repetir</button>
+            </div>
+        </div>
+        
+        <div class="info">
+            <span class="counter" id="contadorFotos">📷 Fotos: 0</span>
+        </div>
         
         <button onclick="enviarRegistro()" style="background:#28a745">
             🚗 Finalizar Registro
         </button>
         
         <div class="estado" id="estado"></div>
-        
-        <img id="preview" class="preview-img" style="display:none">
-        
-        <div id="confirmacion" style="display:none">
-            <div class="confirmacion-buttons">
-                <button class="btn-confirm" onclick="confirmarFoto()">✔ Confirmar</button>
-                <button class="btn-retake" onclick="repetirFoto()">🔄 Repetir</button>
-            </div>
-        </div>
         
         <button class="btn-logout" onclick="logout()">Cerrar sesión</button>
     </div>
@@ -260,11 +284,16 @@ const canvas = document.createElement("canvas")
 let fotos = []
 let currentZoom = 1
 let stream = null
+let fotoPendiente = null
+let nombreArchivoPendiente = null
 
 // Zoom functions
 function applyZoom() {
-    video.style.transform = `scale(${currentZoom})`
-    document.getElementById('zoomIndicator').innerText = `${currentZoom.toFixed(1)}x`
+    if (video) {
+        video.style.transform = `scale(${currentZoom})`
+    }
+    const indicator = document.getElementById('zoomIndicator')
+    if (indicator) indicator.innerText = `${currentZoom.toFixed(1)}x`
 }
 
 function zoomIn() {
@@ -281,7 +310,13 @@ function zoomOut() {
     }
 }
 
-// Reset zoom when taking photo (captura el frame actual con zoom)
+// Reset zoom
+function resetZoom() {
+    currentZoom = 1
+    applyZoom()
+}
+
+// Tomar foto - oculta cámara, muestra confirmación
 async function tomarFoto() {
     const estado = document.getElementById("estado")
     let placa = document.getElementById("placa").value.trim().toUpperCase()
@@ -293,23 +328,18 @@ async function tomarFoto() {
     }
     if (placa === "") placa = "NOPLACA"
 
-    // Capturar el frame actual del video con el zoom aplicado
+    // Capturar el frame actual
     canvas.width = video.videoWidth
     canvas.height = video.videoHeight
     const ctx = canvas.getContext("2d")
     
-    // Si hay zoom, dibujamos la parte ampliada
+    // Aplicar zoom si es necesario
     if (currentZoom > 1) {
         const centerX = video.videoWidth / 2
         const centerY = video.videoHeight / 2
         const cropWidth = video.videoWidth / currentZoom
         const cropHeight = video.videoHeight / currentZoom
-        
-        ctx.drawImage(
-            video, 
-            centerX - cropWidth/2, centerY - cropHeight/2, cropWidth, cropHeight,
-            0, 0, canvas.width, canvas.height
-        )
+        ctx.drawImage(video, centerX - cropWidth/2, centerY - cropHeight/2, cropWidth, cropHeight, 0, 0, canvas.width, canvas.height)
     } else {
         ctx.drawImage(video, 0, 0, canvas.width, canvas.height)
     }
@@ -335,17 +365,66 @@ async function tomarFoto() {
     const blob = await new Promise(resolve => canvas.toBlob(resolve, "image/jpeg", 0.7))
     const nombreArchivo = placa + "_" + formatearFechaArchivo() + ".jpg"
 
-    window.fotoBlob = blob
-    window.nombreArchivo = nombreArchivo
+    // Guardar foto pendiente
+    fotoPendiente = { blob, nombre: nombreArchivo }
+    nombreArchivoPendiente = nombreArchivo
 
-    const preview = document.getElementById("preview")
-    preview.src = URL.createObjectURL(blob)
-    preview.style.display = "block"
-    document.getElementById("confirmacion").style.display = "block"
-    estado.innerText = "Revise la foto antes de enviarla"
+    // Mostrar preview
+    const previewImg = document.getElementById("previewImg")
+    previewImg.src = URL.createObjectURL(blob)
+    
+    // Ocultar cámara, mostrar confirmación
+    document.getElementById("cameraSection").classList.add("hidden")
+    document.getElementById("confirmSection").classList.remove("hidden")
+    
+    estado.innerText = "Revise la foto antes de confirmar"
 }
 
-// Resto de funciones (login, confirmarFoto, etc.) se mantienen igual
+// Confirmar foto - guarda y vuelve a mostrar cámara
+function confirmarFoto() {
+    if (fotoPendiente) {
+        fotos.push(fotoPendiente)
+        document.getElementById("contadorFotos").innerHTML = `📷 Fotos: ${fotos.length}`
+        document.getElementById("estado").innerText = `✅ Foto ${fotos.length} agregada`
+        
+        // Limpiar pendiente
+        fotoPendiente = null
+        nombreArchivoPendiente = null
+        
+        // Ocultar confirmación, mostrar cámara
+        document.getElementById("confirmSection").classList.add("hidden")
+        document.getElementById("cameraSection").classList.remove("hidden")
+        
+        // Reset zoom
+        resetZoom()
+        
+        // Limpiar mensaje después de 2 segundos
+        setTimeout(() => {
+            if (document.getElementById("estado").innerText.includes("agregada")) {
+                document.getElementById("estado").innerText = ""
+            }
+        }, 2000)
+    }
+}
+
+// Repetir foto - solo vuelve a cámara sin guardar
+function repetirFoto() {
+    fotoPendiente = null
+    nombreArchivoPendiente = null
+    
+    document.getElementById("confirmSection").classList.add("hidden")
+    document.getElementById("cameraSection").classList.remove("hidden")
+    document.getElementById("estado").innerText = "Tome otra foto"
+    
+    resetZoom()
+    
+    setTimeout(() => {
+        if (document.getElementById("estado").innerText === "Tome otra foto") {
+            document.getElementById("estado").innerText = ""
+        }
+    }, 2000)
+}
+
 function formatearFechaArchivo() {
     const ahora = new Date()
     const yyyy = ahora.getFullYear()
@@ -355,28 +434,6 @@ function formatearFechaArchivo() {
     const min = String(ahora.getMinutes()).padStart(2,'0')
     const ss = String(ahora.getSeconds()).padStart(2,'0')
     return `${yyyy}-${mm}-${dd}_${hh}-${min}-${ss}`
-}
-
-function confirmarFoto() {
-    fotos.push({
-        blob: window.fotoBlob,
-        nombre: window.nombreArchivo
-    })
-    document.getElementById("contadorFotos").innerText = "📷 Fotos tomadas: " + fotos.length
-    document.getElementById("estado").innerText = "Foto agregada (" + fotos.length + ")"
-    document.getElementById("preview").style.display = "none"
-    document.getElementById("confirmacion").style.display = "none"
-    // Reset zoom after confirming
-    currentZoom = 1
-    applyZoom()
-}
-
-function repetirFoto() {
-    document.getElementById("preview").style.display = "none"
-    document.getElementById("confirmacion").style.display = "none"
-    // Reset zoom
-    currentZoom = 1
-    applyZoom()
 }
 
 async function login() {
@@ -410,16 +467,18 @@ async function login() {
 function mostrarApp(user) {
     document.getElementById("loginSection").style.display = "none"
     document.getElementById("appSection").style.display = "block"
-    document.getElementById("usuarioLabel").innerText = "👤 " + user
+    document.getElementById("usuarioLabel").innerHTML = "👤 " + user
     actualizarFecha()
+    
+    // Asegurar que la cámara esté visible
+    document.getElementById("cameraSection").classList.remove("hidden")
+    document.getElementById("confirmSection").classList.add("hidden")
     
     navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } })
         .then(s => {
             stream = s
             video.srcObject = stream
-            // Reset zoom when camera starts
-            currentZoom = 1
-            applyZoom()
+            resetZoom()
         })
         .catch(err => console.error("Error accessing camera:", err))
 }
@@ -451,7 +510,7 @@ async function enviarRegistro() {
         await fetch(WEBHOOK_FOTOS, { method: "POST", body: formData })
         estado.innerText = "✅ Registro guardado"
         fotos = []
-        document.getElementById("contadorFotos").innerText = "📷 Fotos tomadas: 0"
+        document.getElementById("contadorFotos").innerHTML = "📷 Fotos: 0"
         document.getElementById("placa").value = ""
         document.getElementById("placa").focus()
         actualizarFecha()
@@ -469,36 +528,38 @@ function logout() {
     location.reload()
 }
 
-// Touch zoom support (pinch)
+// Touch zoom support
 let initialDistance = 0
-video.addEventListener('touchstart', (e) => {
-    if (e.touches.length === 2) {
-        initialDistance = Math.hypot(
-            e.touches[0].clientX - e.touches[1].clientX,
-            e.touches[0].clientY - e.touches[1].clientY
-        )
-    }
-})
-video.addEventListener('touchmove', (e) => {
-    if (e.touches.length === 2 && initialDistance > 0) {
-        e.preventDefault()
-        const newDistance = Math.hypot(
-            e.touches[0].clientX - e.touches[1].clientX,
-            e.touches[0].clientY - e.touches[1].clientY
-        )
-        const delta = newDistance / initialDistance
-        let newZoom = currentZoom * delta
-        newZoom = Math.min(3, Math.max(1, newZoom))
-        if (newZoom !== currentZoom) {
-            currentZoom = newZoom
-            applyZoom()
+if (video) {
+    video.addEventListener('touchstart', (e) => {
+        if (e.touches.length === 2) {
+            initialDistance = Math.hypot(
+                e.touches[0].clientX - e.touches[1].clientX,
+                e.touches[0].clientY - e.touches[1].clientY
+            )
         }
-        initialDistance = newDistance
-    }
-})
-video.addEventListener('touchend', () => {
-    initialDistance = 0
-})
+    })
+    video.addEventListener('touchmove', (e) => {
+        if (e.touches.length === 2 && initialDistance > 0) {
+            e.preventDefault()
+            const newDistance = Math.hypot(
+                e.touches[0].clientX - e.touches[1].clientX,
+                e.touches[0].clientY - e.touches[1].clientY
+            )
+            const delta = newDistance / initialDistance
+            let newZoom = currentZoom * delta
+            newZoom = Math.min(3, Math.max(1, newZoom))
+            if (newZoom !== currentZoom) {
+                currentZoom = newZoom
+                applyZoom()
+            }
+            initialDistance = newDistance
+        }
+    })
+    video.addEventListener('touchend', () => {
+        initialDistance = 0
+    })
+}
 </script>
 </body>
 </html>
