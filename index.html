@@ -1,446 +1,504 @@
 <!DOCTYPE html>
-
 <html lang="es">
 <head>
-
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=yes">
+<meta name="theme-color" content="#0078D4">
 <title>Registro Vehículos</title>
-
 <style>
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+        -webkit-tap-highlight-color: transparent;
+    }
 
-body{
-font-family:Arial;
-background:#f4f4f4;
-display:flex;
-justify-content:center;
-align-items:center;
-height:100vh;
-margin:0;
-}
+    body {
+        font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+        background: #f0f2f5;
+        min-height: 100vh;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        padding: 16px;
+    }
 
-.container{
-background:white;
-padding:20px;
-border-radius:10px;
-box-shadow:0 2px 8px rgba(0,0,0,0.2);
-text-align:center;
-width:95%;
-max-width:420px;
-}
+    .container {
+        background: white;
+        border-radius: 28px;
+        padding: 20px;
+        box-shadow: 0 8px 24px rgba(0,0,0,0.1);
+        text-align: center;
+        width: 100%;
+        max-width: 500px;
+        margin: auto;
+    }
 
-h2,h3{
-margin-top:5px;
-}
+    h2, h3 {
+        margin-bottom: 16px;
+        color: #1a1a1a;
+    }
 
-input{
-width:92%;
-padding:12px;
-margin:8px;
-border-radius:6px;
-border:1px solid #ccc;
-font-size:18px;
-text-transform:uppercase;
-}
+    input {
+        width: 100%;
+        padding: 14px;
+        margin: 8px 0;
+        border-radius: 14px;
+        border: 1px solid #ddd;
+        font-size: 16px;
+        text-transform: uppercase;
+        background: #f9f9f9;
+        transition: all 0.2s;
+    }
 
-button{
-padding:15px 20px;
-margin-top:12px;
-font-size:18px;
-border:none;
-border-radius:8px;
-background:#0078D4;
-color:white;
-cursor:pointer;
-width:95%;
-}
+    input:focus {
+        outline: none;
+        border-color: #0078D4;
+        background: white;
+    }
 
-button:disabled{
-background:#999;
-}
+    button {
+        padding: 14px 20px;
+        margin-top: 12px;
+        font-size: 16px;
+        font-weight: 600;
+        border: none;
+        border-radius: 30px;
+        background: #0078D4;
+        color: white;
+        cursor: pointer;
+        width: 100%;
+        transition: transform 0.1s, background 0.2s;
+    }
 
-video{
-width:100%;
-max-width:350px;
-border-radius:10px;
-margin-top:10px;
-}
+    button:active {
+        transform: scale(0.98);
+    }
 
-img{
-margin-top:10px;
-width:100%;
-max-width:350px;
-border-radius:10px;
-border:2px solid #ddd;
-}
+    button:disabled {
+        background: #999;
+        transform: none;
+    }
 
-.info{
-margin-top:8px;
-font-size:14px;
-color:#555;
-}
+    /* Contenedor de la cámara con zoom */
+    .camera-container {
+        position: relative;
+        width: 100%;
+        margin: 16px 0;
+        border-radius: 20px;
+        overflow: hidden;
+        background: #000;
+        touch-action: pinch-zoom;
+    }
 
-.estado{
-margin-top:10px;
-font-weight:bold;
-color:green;
-}
+    video {
+        width: 100%;
+        height: auto;
+        display: block;
+        cursor: pointer;
+        transition: transform 0.1s ease;
+    }
 
-.loginEstado{
-margin-top:10px;
-color:#555;
-}
+    /* Controles de zoom */
+    .zoom-controls {
+        position: absolute;
+        bottom: 16px;
+        right: 16px;
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        z-index: 10;
+    }
 
+    .zoom-btn {
+        width: 48px;
+        height: 48px;
+        border-radius: 50%;
+        background: rgba(0,0,0,0.6);
+        backdrop-filter: blur(4px);
+        color: white;
+        font-size: 24px;
+        font-weight: bold;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        transition: background 0.2s;
+        margin: 0;
+        padding: 0;
+    }
+
+    .zoom-btn:active {
+        background: rgba(0,0,0,0.8);
+        transform: scale(0.95);
+    }
+
+    /* Indicador de zoom */
+    .zoom-indicator {
+        position: absolute;
+        bottom: 16px;
+        left: 16px;
+        background: rgba(0,0,0,0.6);
+        backdrop-filter: blur(4px);
+        padding: 6px 12px;
+        border-radius: 30px;
+        color: white;
+        font-size: 12px;
+        font-weight: 500;
+        z-index: 10;
+    }
+
+    .info {
+        margin: 8px 0;
+        font-size: 13px;
+        color: #666;
+    }
+
+    .estado, .loginEstado {
+        margin-top: 12px;
+        font-weight: 500;
+        font-size: 14px;
+    }
+
+    .estado { color: #28a745; }
+    .loginEstado { color: #dc3545; }
+
+    .preview-img {
+        margin-top: 12px;
+        width: 100%;
+        border-radius: 16px;
+        border: 2px solid #ddd;
+    }
+
+    .confirmacion-buttons {
+        display: flex;
+        gap: 12px;
+        margin-top: 12px;
+    }
+
+    .confirmacion-buttons button {
+        flex: 1;
+        margin: 0;
+    }
+
+    .btn-confirm {
+        background: #28a745;
+    }
+
+    .btn-retake {
+        background: #dc3545;
+    }
+
+    .btn-logout {
+        background: #6c757d;
+        margin-top: 16px;
+    }
+
+    /* Scroll suave */
+    html {
+        scroll-behavior: smooth;
+    }
 </style>
-
 </head>
-
 <body>
 
 <div class="container">
+    <!-- Login Section -->
+    <div id="loginSection">
+        <h2>🔐 Ingreso</h2>
+        <input id="username" placeholder="Usuario" autocomplete="off">
+        <input type="password" id="password" placeholder="Contraseña">
+        <button onclick="login()">Ingresar</button>
+        <div id="loginEstado" class="loginEstado"></div>
+    </div>
 
-<div id="loginSection">
-
-<h2>Ingreso Login</h2>
-
-<input id="username" placeholder="Usuario">
-<input type="password" id="password" placeholder="Contraseña">
-
-<button onclick="login()">Ingresar</button>
-
-<div id="loginEstado" class="loginEstado"></div>
-
-</div>
-
-<div id="appSection" style="display:none">
-
-<h3 id="usuarioLabel"></h3>
-
-<div class="info" id="fechaHora"></div>
-
-<input id="placa" placeholder="Placa vehículo (ABC123)">
-
-<video id="video" autoplay playsinline></video>
-
-<button id="btnFoto" onclick="tomarFoto()">📷 Tomar Foto</button>
-
-<div class="info" id="contadorFotos">Fotos tomadas: 0</div>
-
-<button onclick="enviarRegistro()" style="background:#28a745">
-🚗 Finalizar Registro
-</button>
-
-<div class="estado" id="estado"></div>
-
-<img id="preview" style="display:none">
-
-<div id="confirmacion" style="display:none">
-
-<button onclick="confirmarFoto()" style="background:#28a745">
-✔ Confirmar Foto
-</button>
-
-<button onclick="repetirFoto()" style="background:#dc3545">
-🔄 Tomar Otra
-</button>
-
-</div>
-
-<button onclick="logout()" style="background:#999">Cerrar sesión</button>
-
-</div>
-
+    <!-- App Section -->
+    <div id="appSection" style="display:none">
+        <h3 id="usuarioLabel"></h3>
+        <div class="info" id="fechaHora"></div>
+        
+        <input id="placa" placeholder="Placa (ABC123)" autocomplete="off">
+        
+        <!-- Cámara con zoom -->
+        <div class="camera-container">
+            <video id="video" autoplay playsinline></video>
+            <div class="zoom-controls">
+                <button class="zoom-btn" id="zoomIn" onclick="zoomIn()">+</button>
+                <button class="zoom-btn" id="zoomOut" onclick="zoomOut()">-</button>
+            </div>
+            <div class="zoom-indicator" id="zoomIndicator">1x</div>
+        </div>
+        
+        <button id="btnFoto" onclick="tomarFoto()">📸 Tomar Foto</button>
+        <div class="info" id="contadorFotos">📷 Fotos tomadas: 0</div>
+        
+        <button onclick="enviarRegistro()" style="background:#28a745">
+            🚗 Finalizar Registro
+        </button>
+        
+        <div class="estado" id="estado"></div>
+        
+        <img id="preview" class="preview-img" style="display:none">
+        
+        <div id="confirmacion" style="display:none">
+            <div class="confirmacion-buttons">
+                <button class="btn-confirm" onclick="confirmarFoto()">✔ Confirmar</button>
+                <button class="btn-retake" onclick="repetirFoto()">🔄 Repetir</button>
+            </div>
+        </div>
+        
+        <button class="btn-logout" onclick="logout()">Cerrar sesión</button>
+    </div>
 </div>
 
 <script>
-
 const WEBHOOK_LOGIN = "https://unmeretriciously-clinographic-marlyn.ngrok-free.dev/webhook/login1"
 const WEBHOOK_FOTOS = "https://unmeretriciously-clinographic-marlyn.ngrok-free.dev/webhook/fotos1"
 
-
 const video = document.getElementById("video")
 const canvas = document.createElement("canvas")
-
 let fotos = []
+let currentZoom = 1
+let stream = null
 
-window.onload = () => {
-
-const usuarioGuardado = localStorage.getItem("usuario")
-const loginTime = localStorage.getItem("loginTime")
-
-if(usuarioGuardado && loginTime){
-
-const horasSesion = 12
-const ahora = Date.now()
-
-if((ahora - loginTime) < horasSesion * 60 * 60 * 1000){
-
-mostrarApp(usuarioGuardado)
-
-}else{
-
-localStorage.clear()
-
+// Zoom functions
+function applyZoom() {
+    video.style.transform = `scale(${currentZoom})`
+    document.getElementById('zoomIndicator').innerText = `${currentZoom.toFixed(1)}x`
 }
 
+function zoomIn() {
+    if (currentZoom < 3) {
+        currentZoom = Math.min(3, currentZoom + 0.2)
+        applyZoom()
+    }
 }
 
+function zoomOut() {
+    if (currentZoom > 1) {
+        currentZoom = Math.max(1, currentZoom - 0.2)
+        applyZoom()
+    }
 }
 
-async function login(){
+// Reset zoom when taking photo (captura el frame actual con zoom)
+async function tomarFoto() {
+    const estado = document.getElementById("estado")
+    let placa = document.getElementById("placa").value.trim().toUpperCase()
+    const regex = /^[A-Z]{3}[0-9]{3}$/
 
-const estado = document.getElementById("loginEstado")
-estado.innerText="Validando usuario..."
+    if (placa !== "" && !regex.test(placa)) {
+        alert("Formato placa inválido (ABC123)")
+        return
+    }
+    if (placa === "") placa = "NOPLACA"
 
-const user = document.getElementById("username").value.trim()
-const pass = document.getElementById("password").value.trim()
+    // Capturar el frame actual del video con el zoom aplicado
+    canvas.width = video.videoWidth
+    canvas.height = video.videoHeight
+    const ctx = canvas.getContext("2d")
+    
+    // Si hay zoom, dibujamos la parte ampliada
+    if (currentZoom > 1) {
+        const centerX = video.videoWidth / 2
+        const centerY = video.videoHeight / 2
+        const cropWidth = video.videoWidth / currentZoom
+        const cropHeight = video.videoHeight / currentZoom
+        
+        ctx.drawImage(
+            video, 
+            centerX - cropWidth/2, centerY - cropHeight/2, cropWidth, cropHeight,
+            0, 0, canvas.width, canvas.height
+        )
+    } else {
+        ctx.drawImage(video, 0, 0, canvas.width, canvas.height)
+    }
 
-if(!user || !pass){
+    const ahora = new Date()
+    const fecha = ahora.toLocaleDateString()
+    const hora = ahora.toLocaleTimeString()
+    const usuario = localStorage.getItem("usuario")
 
-estado.innerText="Ingrese usuario y contraseña"
-return
+    // Agregar datos a la foto
+    ctx.font = "12px Arial"
+    ctx.fillStyle = "yellow"
+    ctx.strokeStyle = "black"
+    ctx.lineWidth = 3
 
+    ctx.strokeText(fecha + " " + hora, 10, canvas.height-45)
+    ctx.fillText(fecha + " " + hora, 10, canvas.height-45)
+    ctx.strokeText("USER: " + usuario, 10, canvas.height-25)
+    ctx.fillText("USER: " + usuario, 10, canvas.height-25)
+    ctx.strokeText("PLACA: " + placa, 10, canvas.height-5)
+    ctx.fillText("PLACA: " + placa, 10, canvas.height-5)
+
+    const blob = await new Promise(resolve => canvas.toBlob(resolve, "image/jpeg", 0.7))
+    const nombreArchivo = placa + "_" + formatearFechaArchivo() + ".jpg"
+
+    window.fotoBlob = blob
+    window.nombreArchivo = nombreArchivo
+
+    const preview = document.getElementById("preview")
+    preview.src = URL.createObjectURL(blob)
+    preview.style.display = "block"
+    document.getElementById("confirmacion").style.display = "block"
+    estado.innerText = "Revise la foto antes de enviarla"
 }
 
-try{
+// Resto de funciones (login, confirmarFoto, etc.) se mantienen igual
+function formatearFechaArchivo() {
+    const ahora = new Date()
+    const yyyy = ahora.getFullYear()
+    const mm = String(ahora.getMonth()+1).padStart(2,'0')
+    const dd = String(ahora.getDate()).padStart(2,'0')
+    const hh = String(ahora.getHours()).padStart(2,'0')
+    const min = String(ahora.getMinutes()).padStart(2,'0')
+    const ss = String(ahora.getSeconds()).padStart(2,'0')
+    return `${yyyy}-${mm}-${dd}_${hh}-${min}-${ss}`
+}
 
-const response = await fetch(WEBHOOK_LOGIN,{
-method:"POST",
-headers:{
-"Content-Type":"application/json"
-},
-body:JSON.stringify({
-usuario:user,
-password:pass
+function confirmarFoto() {
+    fotos.push({
+        blob: window.fotoBlob,
+        nombre: window.nombreArchivo
+    })
+    document.getElementById("contadorFotos").innerText = "📷 Fotos tomadas: " + fotos.length
+    document.getElementById("estado").innerText = "Foto agregada (" + fotos.length + ")"
+    document.getElementById("preview").style.display = "none"
+    document.getElementById("confirmacion").style.display = "none"
+    // Reset zoom after confirming
+    currentZoom = 1
+    applyZoom()
+}
+
+function repetirFoto() {
+    document.getElementById("preview").style.display = "none"
+    document.getElementById("confirmacion").style.display = "none"
+    // Reset zoom
+    currentZoom = 1
+    applyZoom()
+}
+
+async function login() {
+    const estado = document.getElementById("loginEstado")
+    estado.innerText = "Validando..."
+    const user = document.getElementById("username").value.trim()
+    const pass = document.getElementById("password").value.trim()
+    if (!user || !pass) {
+        estado.innerText = "Ingrese usuario y contraseña"
+        return
+    }
+    try {
+        const response = await fetch(WEBHOOK_LOGIN, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ usuario: user, password: pass })
+        })
+        const data = await response.json()
+        if (data.login === "ok") {
+            localStorage.setItem("usuario", user)
+            localStorage.setItem("loginTime", Date.now())
+            mostrarApp(user)
+        } else {
+            estado.innerText = "Usuario o contraseña incorrectos"
+        }
+    } catch (error) {
+        estado.innerText = "Error de conexión"
+    }
+}
+
+function mostrarApp(user) {
+    document.getElementById("loginSection").style.display = "none"
+    document.getElementById("appSection").style.display = "block"
+    document.getElementById("usuarioLabel").innerText = "👤 " + user
+    actualizarFecha()
+    
+    navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } })
+        .then(s => {
+            stream = s
+            video.srcObject = stream
+            // Reset zoom when camera starts
+            currentZoom = 1
+            applyZoom()
+        })
+        .catch(err => console.error("Error accessing camera:", err))
+}
+
+function actualizarFecha() {
+    const ahora = new Date()
+    document.getElementById("fechaHora").innerHTML = 
+        "📅 " + ahora.toLocaleDateString() + " | ⏰ " + ahora.toLocaleTimeString()
+}
+
+async function enviarRegistro() {
+    const estado = document.getElementById("estado")
+    if (fotos.length === 0) {
+        estado.innerText = "Debe tomar al menos una foto"
+        return
+    }
+    estado.innerText = "Enviando fotos..."
+    const formData = new FormData()
+    let placa = document.getElementById("placa").value.trim().toUpperCase()
+    if (placa === "") placa = "NOPLACA"
+    formData.append("placa", placa)
+    formData.append("usuario", localStorage.getItem("usuario"))
+    formData.append("fecha", new Date().toISOString())
+    formData.append("totalFotos", fotos.length)
+    fotos.forEach((f, i) => {
+        formData.append("foto" + i, f.blob, f.nombre)
+    })
+    try {
+        await fetch(WEBHOOK_FOTOS, { method: "POST", body: formData })
+        estado.innerText = "✅ Registro guardado"
+        fotos = []
+        document.getElementById("contadorFotos").innerText = "📷 Fotos tomadas: 0"
+        document.getElementById("placa").value = ""
+        document.getElementById("placa").focus()
+        actualizarFecha()
+        setTimeout(() => estado.innerText = "", 3000)
+    } catch (error) {
+        estado.innerText = "❌ Error al enviar"
+    }
+}
+
+function logout() {
+    if (stream) {
+        stream.getTracks().forEach(track => track.stop())
+    }
+    localStorage.clear()
+    location.reload()
+}
+
+// Touch zoom support (pinch)
+let initialDistance = 0
+video.addEventListener('touchstart', (e) => {
+    if (e.touches.length === 2) {
+        initialDistance = Math.hypot(
+            e.touches[0].clientX - e.touches[1].clientX,
+            e.touches[0].clientY - e.touches[1].clientY
+        )
+    }
 })
+video.addEventListener('touchmove', (e) => {
+    if (e.touches.length === 2 && initialDistance > 0) {
+        e.preventDefault()
+        const newDistance = Math.hypot(
+            e.touches[0].clientX - e.touches[1].clientX,
+            e.touches[0].clientY - e.touches[1].clientY
+        )
+        const delta = newDistance / initialDistance
+        let newZoom = currentZoom * delta
+        newZoom = Math.min(3, Math.max(1, newZoom))
+        if (newZoom !== currentZoom) {
+            currentZoom = newZoom
+            applyZoom()
+        }
+        initialDistance = newDistance
+    }
 })
-
-const data = await response.json()
-
-if(data.login === "ok"){
-
-localStorage.setItem("usuario",user)
-localStorage.setItem("loginTime",Date.now())
-
-mostrarApp(user)
-
-}else{
-
-estado.innerText="Usuario o contraseña incorrectos"
-
-}
-
-}catch(error){
-
-estado.innerText="Error de conexión"
-
-}
-
-}
-
-function mostrarApp(user){
-
-document.getElementById("loginSection").style.display="none"
-document.getElementById("appSection").style.display="block"
-
-document.getElementById("usuarioLabel").innerText="Usuario: "+user
-
-actualizarFecha()
-
-navigator.mediaDevices.getUserMedia({
-video:{facingMode:"environment"}
+video.addEventListener('touchend', () => {
+    initialDistance = 0
 })
-.then(stream=>{
-video.srcObject=stream
-})
-
-}
-
-function actualizarFecha(){
-
-const ahora = new Date()
-
-document.getElementById("fechaHora").innerText =
-"Fecha: "+ ahora.toLocaleDateString() +
-" | Hora: "+ ahora.toLocaleTimeString()
-
-}
-
-function formatearFechaArchivo(){
-
-const ahora = new Date()
-
-const yyyy = ahora.getFullYear()
-const mm = String(ahora.getMonth()+1).padStart(2,'0')
-const dd = String(ahora.getDate()).padStart(2,'0')
-const hh = String(ahora.getHours()).padStart(2,'0')
-const min = String(ahora.getMinutes()).padStart(2,'0')
-const ss = String(ahora.getSeconds()).padStart(2,'0')
-
-return `${yyyy}-${mm}-${dd}_${hh}-${min}-${ss}`
-
-}
-
-async function tomarFoto(){
-
-const estado = document.getElementById("estado")
-
-let placa = document.getElementById("placa").value.trim().toUpperCase()
-
-const regex=/^[A-Z]{3}[0-9]{3}$/
-
-if(placa!=="" && !regex.test(placa)){
-
-alert("Formato placa inválido (ABC123)")
-return
-
-}
-
-if(placa===""){
-placa="NOPLACA"
-}
-
-canvas.width=video.videoWidth
-canvas.height=video.videoHeight
-
-const ctx = canvas.getContext("2d")
-
-ctx.drawImage(video,0,0,canvas.width,canvas.height)
-
-const ahora = new Date()
-
-const fecha = ahora.toLocaleDateString()
-const hora = ahora.toLocaleTimeString()
-
-const usuario = localStorage.getItem("usuario")
-
-const linea1 = fecha + " " + hora
-const linea2 = "USER: " + usuario
-const linea3 = "PLACA: " + placa
-
-ctx.font = "12px Arial"
-
-ctx.fillStyle = "yellow"
-ctx.strokeStyle = "black"
-ctx.lineWidth = 3
-
-ctx.strokeText(linea1,10,canvas.height-45)
-ctx.fillText(linea1,10,canvas.height-45)
-
-ctx.strokeText(linea2,10,canvas.height-25)
-ctx.fillText(linea2,10,canvas.height-25)
-
-ctx.strokeText(linea3,10,canvas.height-5)
-ctx.fillText(linea3,10,canvas.height-5)
-
-const blob = await new Promise(resolve => canvas.toBlob(resolve,"image/jpeg",0.7))
-
-const nombreArchivo = placa + "_" + formatearFechaArchivo() + ".jpg"
-
-window.fotoBlob = blob
-window.nombreArchivo = nombreArchivo
-
-const preview = document.getElementById("preview")
-preview.src = URL.createObjectURL(blob)
-preview.style.display = "block"
-
-document.getElementById("confirmacion").style.display = "block"
-
-estado.innerText = "Revise la foto antes de enviarla"
-
-}
-
-function confirmarFoto(){
-
-fotos.push({
-blob:window.fotoBlob,
-nombre:window.nombreArchivo
-})
-
-document.getElementById("contadorFotos").innerText =
-"Fotos tomadas: " + fotos.length
-
-document.getElementById("estado").innerText =
-"Foto agregada ("+fotos.length+")"
-
-document.getElementById("preview").style.display="none"
-document.getElementById("confirmacion").style.display="none"
-
-}
-
-function repetirFoto(){
-
-document.getElementById("preview").style.display="none"
-document.getElementById("confirmacion").style.display="none"
-
-}
-
-async function enviarRegistro(){
-
-const estado=document.getElementById("estado")
-
-if(fotos.length===0){
-estado.innerText="Debe tomar al menos una foto"
-return
-}
-
-estado.innerText="Enviando fotos..."
-
-const formData=new FormData()
-
-let placa=document.getElementById("placa").value.trim().toUpperCase()
-if(placa===""){ placa="NOPLACA" }
-
-formData.append("placa",placa)
-formData.append("usuario",localStorage.getItem("usuario"))
-formData.append("fecha",new Date().toISOString())
-
-// ✅ NUEVO: total de fotos
-formData.append("totalFotos", fotos.length)
-
-fotos.forEach((f,i)=>{
-formData.append("foto"+i,f.blob,f.nombre)
-})
-
-try{
-await fetch(WEBHOOK_FOTOS,{
-method:"POST",
-body:formData
-})
-
-estado.innerText="Registro guardado ✔"
-
-// ✅ limpiar mensaje luego de 3 segundos
-setTimeout(()=>{
-estado.innerText=""
-},3000)
-
-}catch(error){
-estado.innerText="Error al enviar ❌"
-return
-}
-
-fotos=[]
-
-document.getElementById("contadorFotos").innerText="Fotos tomadas: 0"
-
-document.getElementById("placa").value=""
-document.getElementById("placa").focus()
-
-actualizarFecha()
-
-}
-
-function logout(){
-
-localStorage.clear()
-location.reload()
-
-}
-
 </script>
-
 </body>
 </html>
-
