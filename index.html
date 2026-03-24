@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -322,11 +323,16 @@ async function tomarFoto() {
     let placa = document.getElementById("placa").value.trim().toUpperCase()
     const regex = /^[A-Z]{3}[0-9]{3}$/
 
+    // ✅ Validación: placa no puede estar vacía
+    if (placa === "") {
+        alert("Debe ingresar una placa antes de tomar la foto")
+        return
+    }
+
     if (placa !== "" && !regex.test(placa)) {
         alert("Formato placa inválido (ABC123)")
         return
     }
-    if (placa === "") placa = "NOPLACA"
 
     // Capturar el frame actual
     canvas.width = video.videoWidth
@@ -491,14 +497,21 @@ function actualizarFecha() {
 
 async function enviarRegistro() {
     const estado = document.getElementById("estado")
+    const placa = document.getElementById("placa").value.trim().toUpperCase()
+    
+    // ✅ Validación: placa no puede estar vacía
+    if (placa === "") {
+        alert("Debe ingresar una placa antes de finalizar el registro")
+        return
+    }
+    
     if (fotos.length === 0) {
         estado.innerText = "Debe tomar al menos una foto"
         return
     }
+    
     estado.innerText = "Enviando fotos..."
     const formData = new FormData()
-    let placa = document.getElementById("placa").value.trim().toUpperCase()
-    if (placa === "") placa = "NOPLACA"
     formData.append("placa", placa)
     formData.append("usuario", localStorage.getItem("usuario"))
     formData.append("fecha", new Date().toISOString())
