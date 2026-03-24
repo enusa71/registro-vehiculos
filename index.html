@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -238,7 +237,7 @@
         <h3 id="usuarioLabel"></h3>
         <div class="info" id="fechaHora"></div>
         
-        <input id="placa" placeholder="Placa (ABC123)" autocomplete="off">
+        <input id="placa" placeholder="Placa (ABC123 o ABC12D)" autocomplete="off">
         
         <!-- Sección de cámara (visible cuando se toman fotos) -->
         <div id="cameraSection" class="camera-section">
@@ -317,11 +316,19 @@ function resetZoom() {
     applyZoom()
 }
 
+// Validación de placa (carro o moto)
+function validarPlaca(placa) {
+    // Expresión regular para carro: 3 letras + 3 números (ej. ABC123)
+    const regexCarro = /^[A-Z]{3}[0-9]{3}$/
+    // Expresión regular para moto: 3 letras + 2 números + 1 letra opcional (ej. ABC12D o ABC12)
+    const regexMoto = /^[A-Z]{3}[0-9]{2}[A-Z]?$/
+    return regexCarro.test(placa) || regexMoto.test(placa)
+}
+
 // Tomar foto - oculta cámara, muestra confirmación
 async function tomarFoto() {
     const estado = document.getElementById("estado")
     let placa = document.getElementById("placa").value.trim().toUpperCase()
-    const regex = /^[A-Z]{3}[0-9]{3}$/
 
     // ✅ Validación: placa no puede estar vacía
     if (placa === "") {
@@ -329,8 +336,8 @@ async function tomarFoto() {
         return
     }
 
-    if (placa !== "" && !regex.test(placa)) {
-        alert("Formato placa inválido (ABC123)")
+    if (!validarPlaca(placa)) {
+        alert("Formato de placa inválido. Use formato para carro (ABC123) o moto (ABC12D o ABC12)")
         return
     }
 
@@ -502,6 +509,11 @@ async function enviarRegistro() {
     // ✅ Validación: placa no puede estar vacía
     if (placa === "") {
         alert("Debe ingresar una placa antes de finalizar el registro")
+        return
+    }
+    
+    if (!validarPlaca(placa)) {
+        alert("Formato de placa inválido. Use formato para carro (ABC123) o moto (ABC12D o ABC12)")
         return
     }
     
