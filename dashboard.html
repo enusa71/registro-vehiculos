@@ -1,0 +1,515 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - Análisis de Fotos</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/moment@2.29.4/moment.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+            background: #f0f2f5;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            color: #1a1a1a;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        /* Tarjetas de KPIs */
+        .kpi-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .kpi-card {
+            background: white;
+            border-radius: 20px;
+            padding: 20px;
+            text-align: center;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        }
+
+        .kpi-card .value {
+            font-size: 36px;
+            font-weight: bold;
+            color: #0078D4;
+        }
+
+        .kpi-card .label {
+            font-size: 14px;
+            color: #666;
+            margin-top: 8px;
+        }
+
+        /* Gráficos */
+        .charts-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .chart-card {
+            background: white;
+            border-radius: 20px;
+            padding: 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        }
+
+        .chart-card h3 {
+            margin-bottom: 15px;
+            color: #333;
+            font-size: 16px;
+        }
+
+        canvas {
+            max-height: 300px;
+        }
+
+        /* Tabla */
+        .table-container {
+            background: white;
+            border-radius: 20px;
+            padding: 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+            overflow-x: auto;
+        }
+
+        .table-container h3 {
+            margin-bottom: 15px;
+            color: #333;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #eee;
+        }
+
+        th {
+            background: #f8f9fa;
+            font-weight: 600;
+        }
+
+        .filters {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+            background: white;
+            padding: 15px 20px;
+            border-radius: 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        }
+
+        .filter-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .filter-group label {
+            font-size: 12px;
+            color: #666;
+            margin-bottom: 4px;
+        }
+
+        .filter-group input, .filter-group select {
+            padding: 8px 12px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            min-width: 150px;
+        }
+
+        button {
+            background: #0078D4;
+            color: white;
+            border: none;
+            padding: 8px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            margin-top: 20px;
+        }
+
+        button:hover {
+            background: #005a9e;
+        }
+
+        .btn-limpiar {
+            background: #6c757d;
+        }
+
+        .btn-limpiar:hover {
+            background: #5a6268;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #666;
+        }
+
+        .error {
+            color: #dc3545;
+            text-align: center;
+            padding: 20px;
+        }
+
+        .filters-actions {
+            display: flex;
+            gap: 10px;
+            align-items: flex-end;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h1>📸 Dashboard de Análisis de Fotos</h1>
+
+    <!-- Filtros -->
+    <div class="filters">
+        <div class="filter-group">
+            <label>📅 Fecha desde</label>
+            <input type="date" id="fechaInicio">
+        </div>
+        <div class="filter-group">
+            <label>📅 Fecha hasta</label>
+            <input type="date" id="fechaFin">
+        </div>
+        <div class="filter-group">
+            <label>👤 Usuario</label>
+            <input type="text" id="filtroUsuario" placeholder="Filtrar por usuario">
+        </div>
+        <div class="filter-group">
+            <label>🚗 Placa</label>
+            <input type="text" id="filtroPlaca" placeholder="Filtrar por placa">
+        </div>
+        <div class="filters-actions">
+            <button onclick="aplicarFiltros()">🔍 Aplicar filtros</button>
+            <button class="btn-limpiar" onclick="limpiarFiltros()">🗑️ Limpiar</button>
+        </div>
+    </div>
+
+    <!-- KPIs -->
+    <div class="kpi-grid" id="kpis">
+        <div class="kpi-card"><div class="value" id="totalFotos">-</div><div class="label">📷 Total Fotos</div></div>
+        <div class="kpi-card"><div class="value" id="totalPlacas">-</div><div class="label">🚗 Placas distintas</div></div>
+        <div class="kpi-card"><div class="value" id="totalUsuarios">-</div><div class="label">👥 Usuarios activos</div></div>
+        <div class="kpi-card"><div class="value" id="promedioFotos">-</div><div class="label">📊 Promedio fotos/día</div></div>
+    </div>
+
+    <!-- Gráficos -->
+    <div class="charts-grid">
+        <div class="chart-card">
+            <h3>📅 Fotos por fecha</h3>
+            <canvas id="chartPorFecha"></canvas>
+        </div>
+        <div class="chart-card">
+            <h3>👥 Fotos por usuario</h3>
+            <canvas id="chartPorUsuario"></canvas>
+        </div>
+        <div class="chart-card">
+            <h3>🚗 Top 10 placas más fotografiadas</h3>
+            <canvas id="chartPorPlaca"></canvas>
+        </div>
+        <div class="chart-card">
+            <h3>📊 Fotos por día de la semana</h3>
+            <canvas id="chartPorDiaSemana"></canvas>
+        </div>
+    </div>
+
+    <!-- Tabla resumen -->
+    <div class="table-container">
+        <h3>📋 Resumen por placa y usuario</h3>
+        <div style="overflow-x: auto;">
+            <table id="tablaResumen">
+                <thead>
+                    <tr>
+                        <th>🚗 Placa</th>
+                        <th>👤 Usuario</th>
+                        <th>📷 Total fotos</th>
+                        <th>🕒 Última foto</th>
+                        <th>📅 Primera foto</th>
+                    </tr>
+                </thead>
+                <tbody id="tablaBody">
+                    <tr><td colspan="5" class="loading">🔄 Cargando datos desde SharePoint...</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<script>
+    // ============================================
+    // CONFIGURACIÓN DE SHAREPOINT
+    // ============================================
+    const SITE_URL = "https://zonafrancabarranquilla.sharepoint.com/sites/FotosApp";
+    const LIST_NAME = "RegistrosFotos";
+    
+    // Lista de fotos (se cargará desde SharePoint)
+    let fotos = [];
+    let charts = {};
+
+    // ============================================
+    // OBTENER DATOS DESDE SHAREPOINT
+    // ============================================
+    async function obtenerDatos() {
+        try {
+            // Usar la API REST de SharePoint con autenticación implícita
+            const response = await fetch(`${SITE_URL}/_api/web/lists/getbytitle('${LIST_NAME}')/items?$orderby=Fecha desc&$top=5000`, {
+                headers: {
+                    'Accept': 'application/json;odata=verbose'
+                }
+            });
+            
+            if (!response.ok) throw new Error(`Error HTTP: ${response.status}`);
+            
+            const data = await response.json();
+            fotos = data.d.results.map(foto => ({
+                id: foto.Id,
+                placa: foto.Title ? foto.Title.split('_')[0] : 'N/A',
+                usuario: foto.Usuario || 'Desconocido',
+                fecha: moment(foto.Fecha).format('YYYY-MM-DD'),
+                fechaCompleta: foto.Fecha,
+                nombreArchivo: foto.NombreArchivo,
+                imagenURL: foto.ImagenURL
+            }));
+            
+            console.log(`✅ ${fotos.length} fotos cargadas correctamente`);
+            return true;
+        } catch (error) {
+            console.error('Error:', error);
+            document.getElementById('tablaBody').innerHTML = `<tr><td colspan="5" class="error">❌ Error al cargar datos: ${error.message}<br><br>Verifica que estás autenticado en SharePoint y que la lista "${LIST_NAME}" existe.</td></tr>`;
+            return false;
+        }
+    }
+
+    // ============================================
+    // APLICAR FILTROS
+    // ============================================
+    function aplicarFiltros() {
+        const fechaInicio = document.getElementById('fechaInicio').value;
+        const fechaFin = document.getElementById('fechaFin').value;
+        const filtroUsuario = document.getElementById('filtroUsuario').value.trim().toLowerCase();
+        const filtroPlaca = document.getElementById('filtroPlaca').value.trim().toUpperCase();
+        
+        let datosFiltrados = fotos;
+        
+        if (fechaInicio) {
+            datosFiltrados = datosFiltrados.filter(f => f.fecha >= fechaInicio);
+        }
+        if (fechaFin) {
+            datosFiltrados = datosFiltrados.filter(f => f.fecha <= fechaFin);
+        }
+        if (filtroUsuario) {
+            datosFiltrados = datosFiltrados.filter(f => f.usuario?.toLowerCase().includes(filtroUsuario));
+        }
+        if (filtroPlaca) {
+            datosFiltrados = datosFiltrados.filter(f => f.placa === filtroPlaca);
+        }
+        
+        actualizarDashboard(datosFiltrados);
+    }
+    
+    function limpiarFiltros() {
+        document.getElementById('fechaInicio').value = '';
+        document.getElementById('fechaFin').value = '';
+        document.getElementById('filtroUsuario').value = '';
+        document.getElementById('filtroPlaca').value = '';
+        actualizarDashboard(fotos);
+    }
+
+    // ============================================
+    // ACTUALIZAR DASHBOARD
+    // ============================================
+    function actualizarDashboard(datos) {
+        if (!datos || datos.length === 0) {
+            mostrarVacio();
+            return;
+        }
+        
+        // 1. KPIs
+        const totalFotos = datos.length;
+        const totalPlacas = [...new Set(datos.map(f => f.placa))].length;
+        const totalUsuarios = [...new Set(datos.map(f => f.usuario))].length;
+        const dias = [...new Set(datos.map(f => f.fecha))].length;
+        const promedioFotos = dias > 0 ? (totalFotos / dias).toFixed(1) : 0;
+        
+        document.getElementById('totalFotos').innerText = totalFotos;
+        document.getElementById('totalPlacas').innerText = totalPlacas;
+        document.getElementById('totalUsuarios').innerText = totalUsuarios;
+        document.getElementById('promedioFotos').innerText = promedioFotos;
+        
+        // 2. Fotos por fecha
+        const fotosPorFecha = {};
+        datos.forEach(f => {
+            fotosPorFecha[f.fecha] = (fotosPorFecha[f.fecha] || 0) + 1;
+        });
+        const fechasOrdenadas = Object.keys(fotosPorFecha).sort();
+        const valoresFechas = fechasOrdenadas.map(f => fotosPorFecha[f]);
+        
+        actualizarGrafico('chartPorFecha', fechasOrdenadas, valoresFechas, 'bar');
+        
+        // 3. Fotos por usuario
+        const fotosPorUsuario = {};
+        datos.forEach(f => {
+            fotosPorUsuario[f.usuario] = (fotosPorUsuario[f.usuario] || 0) + 1;
+        });
+        const usuariosOrdenados = Object.entries(fotosPorUsuario).sort((a,b) => b[1] - a[1]);
+        const labelsUsuarios = usuariosOrdenados.map(u => u[0]);
+        const valoresUsuarios = usuariosOrdenados.map(u => u[1]);
+        
+        actualizarGrafico('chartPorUsuario', labelsUsuarios, valoresUsuarios, 'bar');
+        
+        // 4. Top 10 placas
+        const fotosPorPlaca = {};
+        datos.forEach(f => {
+            fotosPorPlaca[f.placa] = (fotosPorPlaca[f.placa] || 0) + 1;
+        });
+        const placasOrdenadas = Object.entries(fotosPorPlaca).sort((a,b) => b[1] - a[1]).slice(0, 10);
+        const labelsPlacas = placasOrdenadas.map(p => p[0]);
+        const valoresPlacas = placasOrdenadas.map(p => p[1]);
+        
+        actualizarGrafico('chartPorPlaca', labelsPlacas, valoresPlacas, 'bar');
+        
+        // 5. Fotos por día de la semana
+        const diasSemana = ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'];
+        const fotosPorDia = [0,0,0,0,0,0,0];
+        datos.forEach(f => {
+            const dia = new Date(f.fechaCompleta).getDay();
+            fotosPorDia[dia]++;
+        });
+        
+        actualizarGrafico('chartPorDiaSemana', diasSemana, fotosPorDia, 'bar');
+        
+        // 6. Tabla resumen por placa y usuario
+        const resumen = {};
+        datos.forEach(f => {
+            const key = `${f.placa}|${f.usuario}`;
+            if (!resumen[key]) {
+                resumen[key] = { placa: f.placa, usuario: f.usuario, total: 0, ultima: f.fechaCompleta, primera: f.fechaCompleta };
+            }
+            resumen[key].total++;
+            if (new Date(f.fechaCompleta) > new Date(resumen[key].ultima)) resumen[key].ultima = f.fechaCompleta;
+            if (new Date(f.fechaCompleta) < new Date(resumen[key].primera)) resumen[key].primera = f.fechaCompleta;
+        });
+        
+        const resumenArray = Object.values(resumen).sort((a,b) => b.total - a.total);
+        const tablaBody = document.getElementById('tablaBody');
+        tablaBody.innerHTML = resumenArray.map(r => `
+            <tr>
+                <td><strong>${escapeHtml(r.placa)}</strong></td>
+                <td>${escapeHtml(r.usuario)}</td>
+                <td>${r.total}</td>
+                <td>${moment(r.ultima).format('DD/MM/YYYY HH:mm')}</td>
+                <td>${moment(r.primera).format('DD/MM/YYYY')}</td>
+            </tr>
+        `).join('');
+    }
+    
+    function escapeHtml(text) {
+        if (!text) return '';
+        return text.replace(/[&<>]/g, function(m) {
+            if (m === '&') return '&amp;';
+            if (m === '<') return '&lt;';
+            if (m === '>') return '&gt;';
+            return m;
+        });
+    }
+    
+    function mostrarVacio() {
+        document.getElementById('totalFotos').innerText = '0';
+        document.getElementById('totalPlacas').innerText = '0';
+        document.getElementById('totalUsuarios').innerText = '0';
+        document.getElementById('promedioFotos').innerText = '0';
+        document.getElementById('tablaBody').innerHTML = '<tr><td colspan="5" class="loading">📭 No hay datos con los filtros seleccionados</td></tr>';
+        
+        actualizarGrafico('chartPorFecha', [], [], 'bar');
+        actualizarGrafico('chartPorUsuario', [], [], 'bar');
+        actualizarGrafico('chartPorPlaca', [], [], 'bar');
+        actualizarGrafico('chartPorDiaSemana', ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'], [0,0,0,0,0,0,0], 'bar');
+    }
+    
+    function actualizarGrafico(canvasId, labels, data, tipo) {
+        const canvas = document.getElementById(canvasId);
+        if (!canvas) return;
+        
+        const ctx = canvas.getContext('2d');
+        if (charts[canvasId]) {
+            charts[canvasId].destroy();
+        }
+        
+        if (labels.length === 0) {
+            charts[canvasId] = new Chart(ctx, {
+                type: 'bar',
+                data: { labels: ['No hay datos'], datasets: [{ label: 'Cantidad', data: [0] }] },
+                options: { responsive: true, maintainAspectRatio: true }
+            });
+            return;
+        }
+        
+        charts[canvasId] = new Chart(ctx, {
+            type: tipo === 'line' ? 'line' : 'bar',
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: 'Cantidad',
+                    data: data,
+                    backgroundColor: 'rgba(0, 120, 212, 0.6)',
+                    borderColor: '#0078D4',
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: true,
+                plugins: {
+                    legend: { display: false },
+                    tooltip: { callbacks: { label: (ctx) => `${ctx.raw} fotos` } }
+                },
+                scales: { y: { beginAtZero: true, ticks: { stepSize: 1, precision: 0 } } }
+            }
+        });
+    }
+
+    // ============================================
+    // INICIALIZAR
+    // ============================================
+    async function init() {
+        document.getElementById('tablaBody').innerHTML = '<tr><td colspan="5" class="loading">🔄 Cargando datos desde SharePoint...</td></tr>';
+        const ok = await obtenerDatos();
+        if (ok && fotos.length > 0) {
+            actualizarDashboard(fotos);
+        } else if (ok && fotos.length === 0) {
+            document.getElementById('tablaBody').innerHTML = '<tr><td colspan="5" class="loading">📭 No hay fotos registradas aún</td></tr>';
+        }
+    }
+    
+    init();
+</script>
+</body>
+</html>
