@@ -1,590 +1,411 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=yes">
-<meta name="theme-color" content="#0078D4">
-<title>Registro Vehículos</title>
-<style>
-    * {
-        margin: 0;
-        padding: 0;
-        box-sizing: border-box;
-        -webkit-tap-highlight-color: transparent;
-    }
-
-    body {
-        font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
-        background: #f0f2f5;
-        min-height: 100vh;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        padding: 16px;
-    }
-
-    .container {
-        background: white;
-        border-radius: 28px;
-        padding: 20px;
-        box-shadow: 0 8px 24px rgba(0,0,0,0.1);
-        width: 100%;
-        max-width: 500px;
-        margin: auto;
-        transition: all 0.3s ease;
-    }
-
-    h2, h3 {
-        margin-bottom: 16px;
-        color: #1a1a1a;
-        text-align: center;
-    }
-
-    input {
-        width: 100%;
-        padding: 14px;
-        margin: 8px 0;
-        border-radius: 14px;
-        border: 1px solid #ddd;
-        font-size: 16px;
-        text-transform: uppercase;
-        background: #f9f9f9;
-        transition: all 0.2s;
-        box-sizing: border-box;
-    }
-
-    input:focus {
-        outline: none;
-        border-color: #0078D4;
-        background: white;
-    }
-
-    button {
-        padding: 14px 20px;
-        margin-top: 12px;
-        font-size: 16px;
-        font-weight: 600;
-        border: none;
-        border-radius: 30px;
-        background: #0078D4;
-        color: white;
-        cursor: pointer;
-        width: 100%;
-        transition: transform 0.1s, background 0.2s;
-    }
-
-    button:active {
-        transform: scale(0.98);
-    }
-
-    button:disabled {
-        background: #999;
-        transform: none;
-    }
-
-    /* Secciones que se muestran/ocultan */
-    .section {
-        transition: all 0.3s ease;
-    }
-
-    .camera-section {
-        margin: 16px 0;
-    }
-
-    .camera-container {
-        position: relative;
-        width: 100%;
-        border-radius: 20px;
-        overflow: hidden;
-        background: #000;
-        touch-action: pinch-zoom;
-    }
-
-    video {
-        width: 100%;
-        height: auto;
-        display: block;
-    }
-
-    .zoom-controls {
-        position: absolute;
-        bottom: 16px;
-        right: 16px;
-        display: flex;
-        flex-direction: column;
-        gap: 8px;
-        z-index: 10;
-    }
-
-    .zoom-btn {
-        width: 48px;
-        height: 48px;
-        border-radius: 50%;
-        background: rgba(0,0,0,0.6);
-        backdrop-filter: blur(4px);
-        color: white;
-        font-size: 24px;
-        font-weight: bold;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        cursor: pointer;
-        margin: 0;
-        padding: 0;
-    }
-
-    .zoom-btn:active {
-        background: rgba(0,0,0,0.8);
-        transform: scale(0.95);
-    }
-
-    .zoom-indicator {
-        position: absolute;
-        bottom: 16px;
-        left: 16px;
-        background: rgba(0,0,0,0.6);
-        backdrop-filter: blur(4px);
-        padding: 6px 12px;
-        border-radius: 30px;
-        color: white;
-        font-size: 12px;
-        font-weight: 500;
-        z-index: 10;
-    }
-
-    /* Sección de confirmación de foto */
-    .confirm-section {
-        text-align: center;
-        margin: 16px 0;
-    }
-
-    .confirm-img {
-        width: 100%;
-        border-radius: 20px;
-        border: 2px solid #ddd;
-        margin-bottom: 16px;
-    }
-
-    .confirm-buttons {
-        display: flex;
-        gap: 12px;
-    }
-
-    .confirm-buttons button {
-        flex: 1;
-        margin: 0;
-    }
-
-    .btn-confirm {
-        background: #28a745;
-    }
-
-    .btn-retake {
-        background: #dc3545;
-    }
-
-    .info {
-        margin: 8px 0;
-        font-size: 13px;
-        color: #666;
-        text-align: center;
-    }
-
-    .estado, .loginEstado {
-        margin-top: 12px;
-        font-weight: 500;
-        font-size: 14px;
-        text-align: center;
-    }
-
-    .estado { color: #28a745; }
-    .loginEstado { color: #dc3545; }
-
-    .btn-logout {
-        background: #6c757d;
-        margin-top: 16px;
-    }
-
-    .counter {
-        background: #f0f2f5;
-        padding: 8px 16px;
-        border-radius: 30px;
-        display: inline-block;
-        margin: 8px auto;
-        font-size: 14px;
-        font-weight: 500;
-    }
-
-    .hidden {
-        display: none;
-    }
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>Mantenimiento Zona Franca</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        body { background-color: #f0f2f5; padding: 20px; }
+        .card { border-radius: 20px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
+        .login-container { max-width: 400px; margin: 100px auto; }
+        .dashboard { display: none; }
+        .camera-container {
+            background: #000;
+            border-radius: 16px;
+            overflow: hidden;
+            width: 100%;
+            max-width: 500px;
+            margin: 0 auto;
+        }
+        video, canvas { width: 100%; height: auto; display: block; }
+        .zoom-slider { width: 80%; margin: 10px auto; }
+        .preview-img { max-width: 100%; border-radius: 12px; margin-top: 10px; }
+        .btn-group-custom { margin-top: 15px; display: flex; gap: 10px; justify-content: center; }
+        .loading {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 9999;
+            justify-content: center;
+            align-items: center;
+            color: white;
+        }
+        .table-responsive { overflow-x: auto; }
+        .btn-sm { margin: 2px; }
+        .custom-toast {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: #28a745;
+            color: white;
+            padding: 12px 20px;
+            border-radius: 40px;
+            z-index: 10000;
+            opacity: 0;
+            transition: opacity 0.3s;
+            pointer-events: none;
+            font-weight: 500;
+        }
+        .custom-toast.error { background: #dc3545; }
+        .custom-toast.warning { background: #ffc107; color: #212529; }
+    </style>
 </head>
 <body>
 
-<div class="container">
-    <!-- Login Section -->
-    <div id="loginSection" class="section">
-        <h2>🔐 Ingreso</h2>
-        <input id="username" placeholder="Usuario" autocomplete="off">
-        <input type="password" id="password" placeholder="Contraseña">
-        <button onclick="login()">Ingresar</button>
-        <div id="loginEstado" class="loginEstado"></div>
-    </div>
+<div class="loading" id="loading"><div class="spinner-border text-light"></div></div>
 
-    <!-- App Section -->
-    <div id="appSection" class="section" style="display:none">
-        <h3 id="usuarioLabel"></h3>
-        <div class="info" id="fechaHora"></div>
-        
-        <input id="placa" placeholder="Placa (ABC123 o ABC12D)" autocomplete="off">
-        
-        <!-- Sección de cámara (visible cuando se toman fotos) -->
-        <div id="cameraSection" class="camera-section">
-            <div class="camera-container">
-                <video id="video" autoplay playsinline></video>
-                <div class="zoom-controls">
-                    <button class="zoom-btn" id="zoomIn" onclick="zoomIn()">+</button>
-                    <button class="zoom-btn" id="zoomOut" onclick="zoomOut()">-</button>
-                </div>
-                <div class="zoom-indicator" id="zoomIndicator">1x</div>
-            </div>
-            <button id="btnFoto" onclick="tomarFoto()">📸 Tomar Foto</button>
-        </div>
-        
-        <!-- Sección de confirmación de foto (visible después de tomar foto) -->
-        <div id="confirmSection" class="confirm-section hidden">
-            <img id="previewImg" class="confirm-img">
-            <div class="confirm-buttons">
-                <button class="btn-confirm" onclick="confirmarFoto()">✔ Confirmar</button>
-                <button class="btn-retake" onclick="repetirFoto()">🔄 Repetir</button>
-            </div>
-        </div>
-        
-        <div class="info">
-            <span class="counter" id="contadorFotos">📷 Fotos: 0</span>
-        </div>
-        
-        <button onclick="enviarRegistro()" style="background:#28a745">
-            🚗 Finalizar Registro
-        </button>
-        
-        <div class="estado" id="estado"></div>
-        
-        <button class="btn-logout" onclick="logout()">Cerrar sesión</button>
+<!-- Login -->
+<div id="loginContainer" class="container login-container">
+    <div class="card p-4">
+        <h3 class="text-center mb-4"><i class="fas fa-hard-hat"></i> Mantenimiento Zona Franca</h3>
+        <form id="loginForm">
+            <div class="mb-3"><label>Usuario</label><input type="text" id="usuario" class="form-control" required></div>
+            <div class="mb-3"><label>Contraseña</label><input type="password" id="password" class="form-control" required></div>
+            <button type="submit" class="btn btn-primary w-100">Ingresar</button>
+        </form>
+        <div id="loginError" class="alert alert-danger mt-3 d-none"></div>
     </div>
 </div>
 
+<!-- Dashboard -->
+<div id="dashboard" class="dashboard container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap">
+        <h2><i class="fas fa-tools"></i> Sistema de Mantenimiento</h2>
+        <div><span id="userName" class="badge bg-secondary me-2"></span><button id="logoutBtn" class="btn btn-outline-danger btn-sm">Cerrar sesión</button></div>
+    </div>
+
+    <!-- Panel Admin (CRUD activos) -->
+    <div id="adminPanel" class="card p-3 mb-4" style="display:none;">
+        <h4>Gestión de Activos</h4>
+        <button class="btn btn-primary mb-3" data-bs-toggle="modal" data-bs-target="#modalActivo">+ Nuevo Activo</button>
+        <div class="table-responsive">
+            <table class="table table-hover">
+                <thead><tr><th>ID</th><th>Código</th><th>Nombre</th><th>Tipo</th><th>Ubicación</th><th>Acciones</th></tr></thead>
+                <tbody id="activosTableBody"></tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Panel Técnico (toma de fotos) -->
+    <div id="tecnicoPanel" class="card p-3" style="display:none;">
+        <h4>Registro de Evidencias</h4>
+        <div class="mb-3">
+            <label>Seleccione el activo (bodega / equipo)</label>
+            <select id="activoSelect" class="form-select" required>
+                <option value="">Cargando activos...</option>
+            </select>
+        </div>
+        <div class="camera-container">
+            <video id="cameraVideo" autoplay playsinline></video>
+            <canvas id="cameraCanvas" style="display:none;"></canvas>
+        </div>
+        <div class="text-center mt-2">
+            <input type="range" id="zoomSlider" class="zoom-slider" min="1" max="3" step="0.05" value="1">
+            <label>Zoom (acercar/alejar)</label>
+        </div>
+        <div class="btn-group-custom">
+            <button id="btnTakePhoto" class="btn btn-primary btn-lg">📷 Tomar foto</button>
+            <button id="btnRetakePhoto" class="btn btn-warning btn-lg" style="display:none;">🔄 Repetir</button>
+            <button id="btnAcceptPhoto" class="btn btn-success btn-lg" style="display:none;">✅ Aceptar y subir</button>
+        </div>
+        <div id="previewArea" class="mt-3 text-center" style="display:none;">
+            <h5>Vista previa</h5>
+            <img id="previewImg" class="preview-img" src="">
+        </div>
+        <div id="messageArea" class="mt-3 alert alert-info d-none"></div>
+    </div>
+</div>
+
+<!-- Modal para crear/editar activo -->
+<div class="modal fade" id="modalActivo" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header"><h5>Activo</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
+            <div class="modal-body">
+                <form id="formActivo">
+                    <input type="hidden" id="activoId">
+                    <div class="mb-2"><label>Código</label><input type="text" id="activoCodigo" class="form-control" required></div>
+                    <div class="mb-2"><label>Nombre</label><input type="text" id="activoNombre" class="form-control" required></div>
+                    <div class="mb-2"><label>Tipo</label><input type="text" id="activoTipo" class="form-control" required></div>
+                    <div class="mb-2"><label>Ubicación</label><input type="text" id="activoUbicacion" class="form-control"></div>
+                </form>
+            </div>
+            <div class="modal-footer"><button class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button><button class="btn btn-primary" id="guardarActivoBtn">Guardar</button></div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
 <script>
-const WEBHOOK_LOGIN = "https://unmeretriciously-clinographic-marlyn.ngrok-free.dev/webhook/login1"
-const WEBHOOK_FOTOS = "https://unmeretriciously-clinographic-marlyn.ngrok-free.dev/webhook/fotos1"
+    // ==================== CONFIGURACIÓN ====================
+    const N8N_BASE_URL = 'https://api.enusa.org';   // Cambia si tu n8n está en otro dominio
+    const WEBHOOK_LOGIN = `${N8N_BASE_URL}/webhook/login`;
+    const WEBHOOK_LISTAR_ACTIVOS = `${N8N_BASE_URL}/webhook/listar-activos`;
+    const WEBHOOK_CREAR_ACTIVO = `${N8N_BASE_URL}/webhook/crear-activo`;
+    const WEBHOOK_ACTUALIZAR_ACTIVO = `${N8N_BASE_URL}/webhook/actualizar-activo`;
+    const WEBHOOK_ELIMINAR_ACTIVO = `${N8N_BASE_URL}/webhook/eliminar-activo`;
+    const WEBHOOK_SUBIR_FOTO = `${N8N_BASE_URL}/webhook/subir-foto`;
 
-const video = document.getElementById("video")
-const canvas = document.createElement("canvas")
-let fotos = []
-let currentZoom = 1
-let stream = null
-let fotoPendiente = null
-let nombreArchivoPendiente = null
+    let currentUser = null;
+    let currentStream = null;
+    let currentZoom = 1;
+    let photoData = null;
+    let currentActivoId = null;
 
-// Zoom functions
-function applyZoom() {
-    if (video) {
-        video.style.transform = `scale(${currentZoom})`
-    }
-    const indicator = document.getElementById('zoomIndicator')
-    if (indicator) indicator.innerText = `${currentZoom.toFixed(1)}x`
-}
+    // Elementos comunes
+    const loadingDiv = document.getElementById('loading');
+    function showLoading() { loadingDiv.style.display = 'flex'; }
+    function hideLoading() { loadingDiv.style.display = 'none'; }
 
-function zoomIn() {
-    if (currentZoom < 3) {
-        currentZoom = Math.min(3, currentZoom + 0.2)
-        applyZoom()
-    }
-}
-
-function zoomOut() {
-    if (currentZoom > 1) {
-        currentZoom = Math.max(1, currentZoom - 0.2)
-        applyZoom()
-    }
-}
-
-// Reset zoom
-function resetZoom() {
-    currentZoom = 1
-    applyZoom()
-}
-
-// Validación de placa (carro o moto)
-function validarPlaca(placa) {
-    // Expresión regular para carro: 3 letras + 3 números (ej. ABC123)
-    const regexCarro = /^[A-Z]{3}[0-9]{3}$/
-    // Expresión regular para moto: 3 letras + 2 números + 1 letra opcional (ej. ABC12D o ABC12)
-    const regexMoto = /^[A-Z]{3}[0-9]{2}[A-Z]?$/
-    return regexCarro.test(placa) || regexMoto.test(placa)
-}
-
-// Tomar foto - oculta cámara, muestra confirmación
-async function tomarFoto() {
-    const estado = document.getElementById("estado")
-    let placa = document.getElementById("placa").value.trim().toUpperCase()
-
-    // ✅ Validación: placa no puede estar vacía
-    if (placa === "") {
-        alert("Debe ingresar una placa antes de tomar la foto")
-        return
+    function showNotification(msg, type = 'success') {
+        const existing = document.querySelector('.custom-toast');
+        if(existing) existing.remove();
+        const toast = document.createElement('div');
+        toast.className = `custom-toast ${type}`;
+        toast.innerText = msg;
+        document.body.appendChild(toast);
+        setTimeout(() => toast.style.opacity = '1', 10);
+        setTimeout(() => { toast.style.opacity = '0'; setTimeout(() => toast.remove(), 300); }, 3000);
     }
 
-    if (!validarPlaca(placa)) {
-        alert("Formato de placa inválido. Use formato para carro (ABC123) o moto (ABC12D o ABC12)")
-        return
-    }
-
-    // Capturar el frame actual
-    canvas.width = video.videoWidth
-    canvas.height = video.videoHeight
-    const ctx = canvas.getContext("2d")
-    
-    // Aplicar zoom si es necesario
-    if (currentZoom > 1) {
-        const centerX = video.videoWidth / 2
-        const centerY = video.videoHeight / 2
-        const cropWidth = video.videoWidth / currentZoom
-        const cropHeight = video.videoHeight / currentZoom
-        ctx.drawImage(video, centerX - cropWidth/2, centerY - cropHeight/2, cropWidth, cropHeight, 0, 0, canvas.width, canvas.height)
-    } else {
-        ctx.drawImage(video, 0, 0, canvas.width, canvas.height)
-    }
-
-    const ahora = new Date()
-    const fecha = ahora.toLocaleDateString()
-    const hora = ahora.toLocaleTimeString()
-    const usuario = localStorage.getItem("usuario")
-
-    // Agregar datos a la foto
-    ctx.font = "12px Arial"
-    ctx.fillStyle = "yellow"
-    ctx.strokeStyle = "black"
-    ctx.lineWidth = 3
-
-    ctx.strokeText(fecha + " " + hora, 10, canvas.height-45)
-    ctx.fillText(fecha + " " + hora, 10, canvas.height-45)
-    ctx.strokeText("USER: " + usuario, 10, canvas.height-25)
-    ctx.fillText("USER: " + usuario, 10, canvas.height-25)
-    ctx.strokeText("PLACA: " + placa, 10, canvas.height-5)
-    ctx.fillText("PLACA: " + placa, 10, canvas.height-5)
-
-    const blob = await new Promise(resolve => canvas.toBlob(resolve, "image/jpeg", 0.7))
-    const nombreArchivo = placa + "_" + formatearFechaArchivo() + ".jpg"
-
-    // Guardar foto pendiente
-    fotoPendiente = { blob, nombre: nombreArchivo }
-    nombreArchivoPendiente = nombreArchivo
-
-    // Mostrar preview
-    const previewImg = document.getElementById("previewImg")
-    previewImg.src = URL.createObjectURL(blob)
-    
-    // Ocultar cámara, mostrar confirmación
-    document.getElementById("cameraSection").classList.add("hidden")
-    document.getElementById("confirmSection").classList.remove("hidden")
-    
-    estado.innerText = "Revise la foto antes de confirmar"
-}
-
-// Confirmar foto - guarda y vuelve a mostrar cámara
-function confirmarFoto() {
-    if (fotoPendiente) {
-        fotos.push(fotoPendiente)
-        document.getElementById("contadorFotos").innerHTML = `📷 Fotos: ${fotos.length}`
-        document.getElementById("estado").innerText = `✅ Foto ${fotos.length} agregada`
-        
-        // Limpiar pendiente
-        fotoPendiente = null
-        nombreArchivoPendiente = null
-        
-        // Ocultar confirmación, mostrar cámara
-        document.getElementById("confirmSection").classList.add("hidden")
-        document.getElementById("cameraSection").classList.remove("hidden")
-        
-        // Reset zoom
-        resetZoom()
-        
-        // Limpiar mensaje después de 2 segundos
-        setTimeout(() => {
-            if (document.getElementById("estado").innerText.includes("agregada")) {
-                document.getElementById("estado").innerText = ""
-            }
-        }, 2000)
-    }
-}
-
-// Repetir foto - solo vuelve a cámara sin guardar
-function repetirFoto() {
-    fotoPendiente = null
-    nombreArchivoPendiente = null
-    
-    document.getElementById("confirmSection").classList.add("hidden")
-    document.getElementById("cameraSection").classList.remove("hidden")
-    document.getElementById("estado").innerText = "Tome otra foto"
-    
-    resetZoom()
-    
-    setTimeout(() => {
-        if (document.getElementById("estado").innerText === "Tome otra foto") {
-            document.getElementById("estado").innerText = ""
+    async function apiCall(url, options = {}) {
+        showLoading();
+        try {
+            const resp = await fetch(url, {
+                headers: { 'Content-Type': 'application/json' },
+                ...options
+            });
+            let data = await resp.json();
+            if (Array.isArray(data) && data.length === 1) data = data[0];
+            if (data && data.success === false) throw new Error(data.error || 'Error');
+            if (!resp.ok) throw new Error(data.error || 'Error HTTP');
+            return data;
+        } catch (err) {
+            showNotification('Error: ' + err.message, 'error');
+            throw err;
+        } finally {
+            hideLoading();
         }
-    }, 2000)
-}
-
-function formatearFechaArchivo() {
-    const ahora = new Date()
-    const yyyy = ahora.getFullYear()
-    const mm = String(ahora.getMonth()+1).padStart(2,'0')
-    const dd = String(ahora.getDate()).padStart(2,'0')
-    const hh = String(ahora.getHours()).padStart(2,'0')
-    const min = String(ahora.getMinutes()).padStart(2,'0')
-    const ss = String(ahora.getSeconds()).padStart(2,'0')
-    return `${yyyy}-${mm}-${dd}_${hh}-${min}-${ss}`
-}
-
-async function login() {
-    const estado = document.getElementById("loginEstado")
-    estado.innerText = "Validando..."
-    const user = document.getElementById("username").value.trim()
-    const pass = document.getElementById("password").value.trim()
-    if (!user || !pass) {
-        estado.innerText = "Ingrese usuario y contraseña"
-        return
     }
-    try {
-        const response = await fetch(WEBHOOK_LOGIN, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ usuario: user, password: pass })
-        })
-        const data = await response.json()
-        if (data.login === "ok") {
-            localStorage.setItem("usuario", user)
-            localStorage.setItem("loginTime", Date.now())
-            mostrarApp(user)
+
+    // ==================== LOGIN ====================
+    document.getElementById('loginForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const usuario = document.getElementById('usuario').value;
+        const password = document.getElementById('password').value;
+        try {
+            const data = await apiCall(WEBHOOK_LOGIN, {
+                method: 'POST',
+                body: JSON.stringify({ usuario, password })
+            });
+            currentUser = data.user;
+            localStorage.setItem('currentUser', JSON.stringify(currentUser));
+            showDashboard();
+        } catch (err) {
+            document.getElementById('loginError').classList.remove('d-none');
+            document.getElementById('loginError').innerText = err.message;
+        }
+    });
+
+    function showDashboard() {
+        document.getElementById('loginContainer').style.display = 'none';
+        document.getElementById('dashboard').style.display = 'block';
+        document.getElementById('userName').innerHTML = `${currentUser.nombre} (${currentUser.rol})`;
+
+        const isAdmin = currentUser.rol === 'admin';
+        document.getElementById('adminPanel').style.display = isAdmin ? 'block' : 'none';
+        document.getElementById('tecnicoPanel').style.display = isAdmin ? 'none' : 'block';
+
+        if (isAdmin) {
+            cargarActivosAdmin();
         } else {
-            estado.innerText = "Usuario o contraseña incorrectos"
+            cargarActivosTecnico();
+            iniciarCamara();
         }
-    } catch (error) {
-        estado.innerText = "Error de conexión"
     }
-}
 
-function mostrarApp(user) {
-    document.getElementById("loginSection").style.display = "none"
-    document.getElementById("appSection").style.display = "block"
-    document.getElementById("usuarioLabel").innerHTML = "👤 " + user
-    actualizarFecha()
-    
-    // Asegurar que la cámara esté visible
-    document.getElementById("cameraSection").classList.remove("hidden")
-    document.getElementById("confirmSection").classList.add("hidden")
-    
-    navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } })
-        .then(s => {
-            stream = s
-            video.srcObject = stream
-            resetZoom()
-        })
-        .catch(err => console.error("Error accessing camera:", err))
-}
+    document.getElementById('logoutBtn').addEventListener('click', () => {
+        localStorage.removeItem('currentUser');
+        location.reload();
+    });
 
-function actualizarFecha() {
-    const ahora = new Date()
-    document.getElementById("fechaHora").innerHTML = 
-        "📅 " + ahora.toLocaleDateString() + " | ⏰ " + ahora.toLocaleTimeString()
-}
-
-async function enviarRegistro() {
-    const estado = document.getElementById("estado")
-    const placa = document.getElementById("placa").value.trim().toUpperCase()
-    
-    // ✅ Validación: placa no puede estar vacía
-    if (placa === "") {
-        alert("Debe ingresar una placa antes de finalizar el registro")
-        return
-    }
-    
-    if (!validarPlaca(placa)) {
-        alert("Formato de placa inválido. Use formato para carro (ABC123) o moto (ABC12D o ABC12)")
-        return
-    }
-    
-    if (fotos.length === 0) {
-        estado.innerText = "Debe tomar al menos una foto"
-        return
-    }
-    
-    estado.innerText = "Enviando fotos..."
-    const formData = new FormData()
-    formData.append("placa", placa)
-    formData.append("usuario", localStorage.getItem("usuario"))
-    formData.append("fecha", new Date().toISOString())
-    formData.append("totalFotos", fotos.length)
-    fotos.forEach((f, i) => {
-        formData.append("foto" + i, f.blob, f.nombre)
-    })
-    try {
-        await fetch(WEBHOOK_FOTOS, { method: "POST", body: formData })
-        estado.innerText = "✅ Registro guardado"
-        fotos = []
-        document.getElementById("contadorFotos").innerHTML = "📷 Fotos: 0"
-        document.getElementById("placa").value = ""
-        document.getElementById("placa").focus()
-        actualizarFecha()
-        setTimeout(() => estado.innerText = "", 3000)
-    } catch (error) {
-        estado.innerText = "❌ Error al enviar"
-    }
-}
-
-function logout() {
-    if (stream) {
-        stream.getTracks().forEach(track => track.stop())
-    }
-    localStorage.clear()
-    location.reload()
-}
-
-// Touch zoom support
-let initialDistance = 0
-if (video) {
-    video.addEventListener('touchstart', (e) => {
-        if (e.touches.length === 2) {
-            initialDistance = Math.hypot(
-                e.touches[0].clientX - e.touches[1].clientX,
-                e.touches[0].clientY - e.touches[1].clientY
-            )
+    // ==================== ADMIN: CRUD de activos ====================
+    async function cargarActivosAdmin() {
+        const data = await apiCall(WEBHOOK_LISTAR_ACTIVOS);
+        const tbody = document.getElementById('activosTableBody');
+        if (!data.length) {
+            tbody.innerHTML = '<tr><td colspan="6">No hay activos registrados</td></tr>';
+            return;
         }
-    })
-    video.addEventListener('touchmove', (e) => {
-        if (e.touches.length === 2 && initialDistance > 0) {
-            e.preventDefault()
-            const newDistance = Math.hypot(
-                e.touches[0].clientX - e.touches[1].clientX,
-                e.touches[0].clientY - e.touches[1].clientY
-            )
-            const delta = newDistance / initialDistance
-            let newZoom = currentZoom * delta
-            newZoom = Math.min(3, Math.max(1, newZoom))
-            if (newZoom !== currentZoom) {
-                currentZoom = newZoom
-                applyZoom()
-            }
-            initialDistance = newDistance
+        tbody.innerHTML = data.map(a => `
+            <tr>
+                <td>${a.id}</td>
+                <td>${a.codigo}</td>
+                <td>${a.nombre}</td>
+                <td>${a.tipo}</td>
+                <td>${a.ubicacion || ''}</td>
+                <td>
+                    <button class="btn btn-sm btn-warning editar-activo" data-id="${a.id}">Editar</button>
+                    <button class="btn btn-sm btn-danger eliminar-activo" data-id="${a.id}">Eliminar</button>
+                </td>
+            </tr>
+        `).join('');
+        document.querySelectorAll('.editar-activo').forEach(btn => btn.onclick = () => editarActivo(btn.dataset.id));
+        document.querySelectorAll('.eliminar-activo').forEach(btn => btn.onclick = () => eliminarActivo(btn.dataset.id));
+    }
+
+    async function editarActivo(id) {
+        const activos = await apiCall(WEBHOOK_LISTAR_ACTIVOS);
+        const activo = activos.find(a => a.id == id);
+        if (activo) {
+            document.getElementById('activoId').value = activo.id;
+            document.getElementById('activoCodigo').value = activo.codigo;
+            document.getElementById('activoNombre').value = activo.nombre;
+            document.getElementById('activoTipo').value = activo.tipo;
+            document.getElementById('activoUbicacion').value = activo.ubicacion || '';
+            new bootstrap.Modal(document.getElementById('modalActivo')).show();
         }
-    })
-    video.addEventListener('touchend', () => {
-        initialDistance = 0
-    })
-}
+    }
+
+    async function eliminarActivo(id) {
+        if (!confirm('¿Eliminar este activo? Se perderán las fotos asociadas.')) return;
+        await apiCall(WEBHOOK_ELIMINAR_ACTIVO, {
+            method: 'DELETE',
+            body: JSON.stringify({ id })
+        });
+        showNotification('Activo eliminado');
+        cargarActivosAdmin();
+    }
+
+    document.getElementById('guardarActivoBtn').onclick = async () => {
+        const id = document.getElementById('activoId').value;
+        const data = {
+            codigo: document.getElementById('activoCodigo').value,
+            nombre: document.getElementById('activoNombre').value,
+            tipo: document.getElementById('activoTipo').value,
+            ubicacion: document.getElementById('activoUbicacion').value
+        };
+        if (id) data.id = id;
+        const url = id ? WEBHOOK_ACTUALIZAR_ACTIVO : WEBHOOK_CREAR_ACTIVO;
+        await apiCall(url, { method: 'POST', body: JSON.stringify(data) });
+        showNotification('Activo guardado');
+        bootstrap.Modal.getInstance(document.getElementById('modalActivo')).hide();
+        cargarActivosAdmin();
+        // También recargar el combo del técnico si está visible (pero no afecta)
+    };
+
+    // ==================== TÉCNICO: toma de fotos ====================
+    async function cargarActivosTecnico() {
+        const data = await apiCall(WEBHOOK_LISTAR_ACTIVOS);
+        const select = document.getElementById('activoSelect');
+        if (!data.length) {
+            select.innerHTML = '<option value="">No hay activos disponibles</option>';
+            return;
+        }
+        select.innerHTML = '<option value="">Seleccione un activo...</option>' +
+            data.map(a => `<option value="${a.id}">${a.codigo} - ${a.nombre}</option>`).join('');
+    }
+
+    async function iniciarCamara() {
+        if (currentStream) currentStream.getTracks().forEach(track => track.stop());
+        try {
+            const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } });
+            currentStream = stream;
+            const video = document.getElementById('cameraVideo');
+            video.srcObject = stream;
+            await video.play();
+            video.style.transform = `scale(${currentZoom})`;
+            // Resetear UI
+            document.getElementById('btnTakePhoto').style.display = 'inline-block';
+            document.getElementById('btnRetakePhoto').style.display = 'none';
+            document.getElementById('btnAcceptPhoto').style.display = 'none';
+            document.getElementById('previewArea').style.display = 'none';
+            photoData = null;
+        } catch (err) {
+            showNotification('No se pudo acceder a la cámara', 'error');
+        }
+    }
+
+    // Zoom
+    const zoomSlider = document.getElementById('zoomSlider');
+    zoomSlider.oninput = (e) => {
+        currentZoom = parseFloat(e.target.value);
+        const video = document.getElementById('cameraVideo');
+        video.style.transform = `scale(${currentZoom})`;
+    };
+
+    // Tomar foto
+    document.getElementById('btnTakePhoto').onclick = () => {
+        const video = document.getElementById('cameraVideo');
+        const canvas = document.getElementById('cameraCanvas');
+        const context = canvas.getContext('2d');
+        canvas.width = video.videoWidth;
+        canvas.height = video.videoHeight;
+        context.drawImage(video, 0, 0, canvas.width, canvas.height);
+        photoData = canvas.toDataURL('image/jpeg', 0.8);
+        document.getElementById('previewImg').src = photoData;
+        document.getElementById('previewArea').style.display = 'block';
+        document.getElementById('btnTakePhoto').style.display = 'none';
+        document.getElementById('btnRetakePhoto').style.display = 'inline-block';
+        document.getElementById('btnAcceptPhoto').style.display = 'inline-block';
+    };
+
+    // Repetir foto
+    document.getElementById('btnRetakePhoto').onclick = () => {
+        photoData = null;
+        document.getElementById('previewArea').style.display = 'none';
+        document.getElementById('btnTakePhoto').style.display = 'inline-block';
+        document.getElementById('btnRetakePhoto').style.display = 'none';
+        document.getElementById('btnAcceptPhoto').style.display = 'none';
+    };
+
+    // Subir foto
+    document.getElementById('btnAcceptPhoto').onclick = async () => {
+        if (!photoData) return;
+        const activoId = document.getElementById('activoSelect').value;
+        if (!activoId) {
+            showNotification('Debe seleccionar un activo', 'warning');
+            return;
+        }
+        try {
+            await apiCall(WEBHOOK_SUBIR_FOTO, {
+                method: 'POST',
+                body: JSON.stringify({
+                    activo_id: parseInt(activoId),
+                    tecnico_id: currentUser.id,
+                    foto_base64: photoData
+                })
+            });
+            showNotification('Foto guardada correctamente');
+            // Reiniciar cámara
+            await iniciarCamara();
+            document.getElementById('activoSelect').value = '';
+            photoData = null;
+            document.getElementById('previewArea').style.display = 'none';
+            document.getElementById('btnTakePhoto').style.display = 'inline-block';
+            document.getElementById('btnRetakePhoto').style.display = 'none';
+            document.getElementById('btnAcceptPhoto').style.display = 'none';
+        } catch (err) {
+            // El mensaje ya se muestra en apiCall
+        }
+    };
+
+    // Inicialización
+    (function init() {
+        const stored = localStorage.getItem('currentUser');
+        if (stored) {
+            try {
+                currentUser = JSON.parse(stored);
+                showDashboard();
+            } catch(e) {}
+        }
+    })();
 </script>
 </body>
 </html>
